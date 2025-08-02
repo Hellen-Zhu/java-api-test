@@ -128,13 +128,10 @@ public class ListenerHelper {
                 "postgresql_lif", "selectStringListBySQL",
                 Map.of("sql", "select value from auto_system_variable where config_key = 'automation-tool.service.url'"))).get(0);
 
-        String token = ((List<String>) DBUtil.doSqlSessionByEnvironment(
-                "postgresql_lif", "selectStringListBySQL",
-                Map.of("sql", "select value from auto_system_variable where config_key = 'JIRA_TOKEN'"))).get(0);
 
         componentScenarioList.forEach(item -> {
             result.put(item.getSuite(),
-                    buildFinalSuiteParamMap(item, originalParams, automationToolSVCUrl, token));
+                    buildFinalSuiteParamMap(item, originalParams, automationToolSVCUrl));
         });
 
         return result;
@@ -162,8 +159,7 @@ public class ListenerHelper {
     private static Map<String, String> buildFinalSuiteParamMap(
             ReportAttributeInfo reportAttributeInfo,
             Map<String, String> originalParams,
-            String automationToolSVCUrl,
-            String token) {
+            String automationToolSVCUrl) {
 
         Map<String, String> result = new HashMap<>();
 
@@ -239,7 +235,6 @@ public class ListenerHelper {
         result.put(XmlSuiteDetailAttribute.BUILD.getName(), "");
         result.put(XmlSuiteDetailAttribute.REGION.getName(), "nam");
         result.put(XmlSuiteDetailAttribute.RUN_ID.getName(), run_id);
-        result.put(XmlSuiteDetailAttribute.JIRA_TOKEN.getName(), token);
 
         return result;
     }
