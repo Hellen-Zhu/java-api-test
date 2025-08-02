@@ -2,7 +2,6 @@ package com.api.testcases.user;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.api.entities.TestAPIParameter;
-import com.api.enums.DBEnum;
 import com.api.helpers.ParameterHelper;
 import com.api.utils.APIUtil;
 import com.api.utils.DBUtil;
@@ -31,7 +30,6 @@ public class Test_login {
         response = APIUtil.requestAPI(testParameter, testContext);
         response.then().assertThat().statusCode(200);
         responseJSON = JSONObject.parseObject(response.body().asString());
-        this.drmsProfile = DBUtil.getProfileName(DBEnum.DRMS, testParameter.getProfileName());
     }
 
     @Test(dependsOnMethods = "trigger_login_API")

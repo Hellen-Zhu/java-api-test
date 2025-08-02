@@ -452,9 +452,6 @@ public class ParameterHelper {
                 return queryFromDb(jsonKey, jsonObject, apiParameter);
             }
 
-            if (jsonObject.containsKey("api")) {
-                return queryFromApi(jsonObject);
-            }
 
 
             if (jsonObject.containsKey("code")) {
@@ -627,11 +624,6 @@ public class ParameterHelper {
         if (sql == null) return result;
         Map<String, String> params = new HashMap<>(); // ###key###!!!
 
-        // explain the sql with inline config
-        if (isSqlContainsConfig(sql)) {
-            sql = fetchConfigInSql(sql, apiParameter);
-        }
-
         // explain the sql with e2e workflow variable and global variable
         sql = parseSqlWithE2eVariable(sql, apiParameter);
         sql = parseSqlWithGlobalVariable(sql, apiParameter);
@@ -686,25 +678,6 @@ public class ParameterHelper {
         }
         matcher.appendTail(result);
         return result.toString();
-    }
-    public static String fetchConfigInSql(String sql, TestAPIParameter apiParameter){
-        String env = "";
-        if(apiParameter.getProfileName().contains("emea")){
-            env="emeaqa";
-        } else if (apiParameter.getProfileName().contains("nam")) {
-            env="namqa";
-        } else if(apiParameter.getProfileName().contains("apac")) {
-            env="apacqa";
-        }
-        String drmsProfile = DBUtil.getProfileName(DBEnum.DRMS, env);
-        Matcher m=Pattern.compile("&\\{\\{([^}]+)}").matcher(sql);
-        while(m.find()){
-            List<String> expectValueList = (List<String>) DBUtil.doSqlSessionByEnvironment(drmsProfile,"selectEHConfiguration",
-                    Map.of("configKey",m.group().substring(1,m.group().length()-1)));
-            String expectValue = expectValueList.size()==0?"false" : expectValueList.get(0);
-            sql = sql.replace(m.group(), expectValue);
-        }
-        return sql;
     }
 
     protected static String defaultSqlQuery(String key, List<LinkedHashMap> list) {
@@ -764,13 +737,6 @@ public class ParameterHelper {
         return result.toString().length() == 0 ? "" : result.substring(0,result.length()-1);
     }
 
-    protected static Object queryFromApi(JSONObject valueObject){
-        Object result = null;
-        if(valueObject.getString("api").equalsIgnoreCase("tpstoken")){
-            result = "Bearer " + APIUtil.generateTPSToken();
-        }
-        return result;
-    }
 
 
     public static String getEliteRefDataApi(String baseUrl, String url, String paramName, String paramValue) {

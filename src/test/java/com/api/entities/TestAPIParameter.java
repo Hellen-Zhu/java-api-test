@@ -100,11 +100,7 @@ public class TestAPIParameter implements Cloneable {
         return this.requestJSONObject.getJSONObject("params");
     }
 
-    public DSEnum getDsEnum(DBEnum type) {
-        return DSEnum.fromValue("getInstance_" + this.profileName + "_" + type.name().toLowerCase());
-    }
-
-    public String getLocalRegion() {
+      public String getLocalRegion() {
         return StringUtils.containsIgnoreCase(this.profileName, "NAM") ? "NAM" :
                 (StringUtils.containsIgnoreCase(this.profileName, "APAC") ? "APAC" : "EMEA");
     }

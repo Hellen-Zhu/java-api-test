@@ -162,16 +162,6 @@ public class APIUtil {
                 if (memoryCacheObject.containsKey("remove")) {
                     MemoryCacheUtil.removeInMemoryCache(memoryCacheObject.getJSONArray("remove"));
                 }
-            } else if (extraStepJSONObject.containsKey("database")) {
-                JSONArray array = extraStepJSONObject.getJSONArray("database");
-                for (int i = 0; i < array.size(); i++) {
-                    String sql = array.getJSONObject(i).getString("sql");
-                    sql = ParameterHelper.parseSqlWithE2eVariable(sql, testParameter);
-                    sql = ParameterHelper.parseSqlWithGlobalVariable(sql, testParameter);
-                    String profile = array.getJSONObject(i).getString("profile");
-                    DBEnum db = array.getJSONObject(i).getString("db").equalsIgnoreCase("drms") ? DBEnum.DRMS : DBEnum.IGNITE;
-                    DBUtil.doSqlSessionByEnvironment(DBUtil.getProfileName(db, profile), "selectStringListBySQL", Map.of("sql", sql));
-                }
             }
 
             if (extraStepJSONObject.containsKey("sleepInMillis")) {
@@ -220,14 +210,6 @@ public class APIUtil {
         if (Constants.SERVICES_SSLIGNORE.contains(parameter.getServiceName().toLowerCase())
                 || Constants.ENDPOINTS_SSLIGNORE.contains(parameter.getClassName())) {
             request = request.relaxedHTTPSValidation();
-        }
-        if (!(parameter.getSuite().contains("FundMetrics")
-                || parameter.getSuite().contains("WebUI - UserAdmin")
-                || parameter.getSuite().contains("WebUI - Portal")
-                || parameter.getSuite().contains("ReportDashboard")
-                || parameter.getSuite().contains("DataLoader"))
-                || parameter.getServiceName().equalsIgnoreCase("eqderivs_trademgmt_unity_svc")) {
-            request = request.auth().basic(ConfigUtil.getPropertyMap().get("security.user.name"), ConfigUtil.getPropertyMap().get("security.user.password"));
         }
 
         if (parameterJSON.containsKey("cookie")) {
@@ -279,44 +261,8 @@ public class APIUtil {
         return response;
     }
 
-    // #region cacerts , TPSToken
-    public static String generateTPSToken() {
-        try {
-            Response response = given().relaxedHTTPSValidation()
-                    .param("username", ConfigUtil.getPropertyMap().get("ehapi.tpstoken.params.username"))
-                    .param("password", ConfigUtil.getPropertyMap().get("ehapi.tpstoken.params.password"))
-                    .param("client_id", ConfigUtil.getPropertyMap().get("ehapi.tpstoken.params.client_id"))
-                    .param("client_secret", ConfigUtil.getPropertyMap().get("ehapi.tpstoken.params.client_secret"))
-                    .param("grant_type", ConfigUtil.getPropertyMap().get("ehapi.tpstoken.params.grant_type"))
-                    .post(ConfigUtil.getPropertyMap().get("ehapi.tpstoken.params.url"))
-                    .then().extract().response();
-            JSONObject jsonObject = JSONObject.parseObject(response.getBody().asString());
-            return jsonObject.get("access_token").toString();
-        } catch (Exception e) {
-            throw new IllegalStateException("failed to generate auth token, " + e.getMessage());
-        }
-    }
 
-    public static void main(String[] args) { System.out.println(generateTPSToken()); }
 
-    public static Response triggerPPLOverwrite(TestAPIParameter apiParameter, String endpoint, String csvContent) {
-        String url = apiParameter.getBaseURL();
-        Response response;
-        try {
-            File tempFile = createTempCSVFile(csvContent);
-            response = RestAssured.given().multiPart(tempFile).post(url + endpoint);
-            tempFile.delete();
-            return response;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static File createTempCSVFile(String content) throws IOException {
-        Path tempFilePath = File.createTempFile("temp", ".csv").toPath();
-        Files.writeString(tempFilePath, content);
-        return tempFilePath.toFile();
-    }
 
     private static String generateURL(TestAPIParameter testAPIParameter) {
         StringBuilder url = Optional.ofNullable(testAPIParameter.getBaseURL()).map(StringBuilder::new).orElse(null);

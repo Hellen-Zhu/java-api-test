@@ -22,12 +22,6 @@ public class DBUtil {
         }
     }
 
-    // #region Version 2.0
-    public static String getProfileName(DBEnum type, String profileName) {
-        return type.name().equalsIgnoreCase("drms") ? profileName + "_drms" :
-                (type.name().equalsIgnoreCase("ignite") ? profileName + "_ignite" : "");
-    }
-
     public static Object doSqlSessionByEnvironment(String environment, String statement, Map parameter) {
         Object result;
         try {
