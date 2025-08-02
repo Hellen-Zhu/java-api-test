@@ -1,0 +1,25 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="suite" verbose="1">
+<listeners>
+    <listener class-name="com.api.listeners.AlterListener"/>
+    <listener class-name="com.api.listeners.XmlTestListener"/>
+    <listener class-name="com.api.listeners.XmlSuiteListener"/>
+</listeners>
+
+<parameter name="isDebug" value="true"/>
+<parameter name="module" value=""/>
+<parameter name="component" value="user"/>
+<parameter name="scenario" value="login"/>
+<parameter name="scenarios" value=""/>
+<parameter name="ids" value=""/>
+<parameter name="runId" value="test-run-001"/>
+<parameter name="releaseVersionList" value=""/>
+<parameter name="sanityOnly" value="false"/>
+<parameter name="labels" value=""/>
+
+<test name="test" preserve-order="false">
+    <classes>
+        <class name="com.api.testcases.TestRunFactory"/>
+    </classes>
+</test>
+</suite>
