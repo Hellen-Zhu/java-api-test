@@ -31,6 +31,8 @@ public class TestRunFactory {
             automationParamsMap.put(XmlSuiteDetailAttribute.RUN_ID.getName(), runId);
             automationParamsMap.put(XmlSuiteDetailAttribute.SANITY_ONLY.getName(), sanityOnly);
 
+            log.info("automationParamsMap: {}", automationParamsMap);
+
             if(idArray.length != 0) automationParamsMap.put(XmlSuiteDetailAttribute.ID_LIST.getName(), idArray);
             if(labelArray.length != 0) automationParamsMap.put(XmlSuiteDetailAttribute.LABEL_LIST.getName(), labelArray);
 

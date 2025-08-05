@@ -1,5 +1,6 @@
 package com.api.testcases;
 
+import lombok.extern.slf4j.Slf4j;
 import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeMethod;
@@ -9,6 +10,7 @@ import com.api.entities.TestAPIParameter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+@Slf4j
 public class BaseTest implements ITest {
     private static ThreadLocal<String> testName = null;
 
@@ -22,7 +24,7 @@ public class BaseTest implements ITest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        log.info("parameter: {}", parameter);
         assert parameter != null;
         realUpdateTestName(method,parameter);
         realUpdateMethodName(method,parameter,parameterField);

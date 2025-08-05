@@ -1,8 +1,42 @@
+spring:
+  application:
+    name: api-auto-test
+  profiles:
+    active: uat
+
+# 为 SessionFactory 添加期望的数据库配置格式
 ehapi:
   db:
     lif:
       uat:
         driver: org.postgresql.Driver
-        url: jdbc:postgresql://127.0.0.1:5432/autotest
-        username: admin 
-        password: password 
+        url: jdbc:postgresql://localhost:5432/autotest
+        username: admin
+        password: password
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080
+
+mybatis:
+  mapper-locations: classpath*:mappers/**/*.xml
+  type-aliases-package: com.api.model
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com.api.mapper: DEBUG
+    com.api.helpers.SessionFactory: DEBUG
+    org.apache.ibatis: DEBUG
+
+
+# 测试配置
+test:
+  timeout: 30000
+  retry-count: 3
+  parallel-threads: 5 

@@ -5,9 +5,11 @@ import java.lang.reflect.Method;
 // Logger and JexlEngine imports would be required here
 import org.apache.commons.jexl3.*;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 import org.testng.log4testng.Logger;
 
+@Slf4j
 public class ReflectionUtil {
      private static final Logger logger = Logger.getLogger(ReflectionUtil.class);
 
@@ -32,6 +34,7 @@ public class ReflectionUtil {
         } catch (ClassNotFoundException e) {
             logger.warn("Warn " + className + " does not exist!");
         }
+        log.info("tclass: {}", tclass);
         return tclass;
     }
 
@@ -43,6 +46,7 @@ public class ReflectionUtil {
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
+        log.info("methodInvoke: {}", methodInvoke);
         return methodInvoke;
     }
 }

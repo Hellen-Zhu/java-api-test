@@ -1,8 +1,5 @@
 package com.api;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import com.api.entities.testng.XmlSuiteDetailAttribute;
 import com.alibaba.fastjson2.JSONObject;
 import org.testng.TestNG;
 import org.testng.xml.SuiteXmlParser;
@@ -18,16 +15,9 @@ public class ApiAutoTestApplicationTests {
     static String XMLFILE = "testng.xml";
 
     public static void main(String[] args) {
-        setSystemProperties();
         runTestNG();
     }
 
-    private static void setSystemProperties() {
-        System.setProperty("spring.application.name", "eh-api");
-        System.setProperty("spring.cloud.config.name", "mondo-testng-api-service");
-        System.setProperty("server.home", ".");
-        System.setProperty("spring.profiles.active", "uat");
-    }
 
     private static void runTestNG() {
         triggerByCode(new JSONObject());

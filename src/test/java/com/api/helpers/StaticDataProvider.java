@@ -19,6 +19,7 @@ public class StaticDataProvider {
         List<TestAPIParameter> testParameters = fetchTestParameterList(params).stream()
                 .distinct()
                 .collect(Collectors.toList());
+        log.info("testParameters: {}", testParameters);
         return getFinalTestParameterArray(testParameters);
     }
 
@@ -40,6 +41,7 @@ public class StaticDataProvider {
             }
             resultArray[i] = ReflectionUtil.fetchMethodInvokeBaseOnClass(clazz, "getInstance", TestAPIParameter.class, testParameter);
         }
+        log.info("resultArray: {}", resultArray);
         return resultArray;
     }
 }

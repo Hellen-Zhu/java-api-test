@@ -121,23 +121,51 @@ public class ListenerHelper {
 
         Map<String, Object> params = fetchSelectParams(originalParams);
 
+        log.info("params: {}", params);
         List<ReportAttributeInfo> componentScenarioList = (List<ReportAttributeInfo>)
                 DBUtil.doSqlSessionByEnvironment("postgresql_lif", "fetchXmlSuiteDetailParameters", params);
 
-        String automationToolSVCUrl = ((List<String>) DBUtil.doSqlSessionByEnvironment(
-                "postgresql_lif", "selectStringListBySQL",
-                Map.of("sql", "select value from auto_system_variable where config_key = 'automation-tool.service.url'"))).get(0);
+        log.info("componentScenarioList: {}", componentScenarioList);
+//        String automationToolSVCUrl = ((List<String>) DBUtil.doSqlSessionByEnvironment(
+//                "postgresql_lif", "selectStringListBySQL",
+//                Map.of("sql", "select value from auto_system_variable where config_key = 'automation-tool.service.url'"))).get(0);
 
+// 1. 先将查询结果保存到一个临时的列表中
+        List<String> results = (List<String>) DBUtil.doSqlSessionByEnvironment(
+                "postgresql_lif",
+                "selectStringListBySQL",
+                Map.of("sql", "select value from auto_system_variable where config_key = 'automation-tool.service.url'")
+        );
 
+        String automationToolSVCUrl; // 2. 先准备一个变量并给一个默认值 (例如 null)
+
+// 3. 在访问列表的任何元素之前，必须先检查列表是否为空！
+        if (results != null && !results.isEmpty()) {
+            // 4. 只有在列表不为空的情况下，才安全地获取第一个元素
+            automationToolSVCUrl = results.get(0);
+        } else {
+            automationToolSVCUrl = null;
+            // 5. (重要) 处理在数据库中未找到该配置项的情况
+            // 您可以在这里记录一条错误日志，或者抛出一个更明确的异常
+            log.error("在数据库 auto_system_variable 表中未找到 key 为 'automation-tool.service.url' 的配置！");
+            // 或者抛出异常来中断执行，这比让程序因为 IndexOutOfBoundsException 崩溃要好得多
+            // throw new IllegalStateException("Configuration 'automation-tool.service.url' not found in database.");
+        }
+
+// ... 后续代码可以继续使用 automationToolSvcUrl 变量 ...
         componentScenarioList.forEach(item -> {
             result.put(item.getSuite(),
                     buildFinalSuiteParamMap(item, originalParams, automationToolSVCUrl));
         });
 
+        // 打印result
+        log.info("result: {}", result);
+        
         return result;
     }
 
     private static Map<String, Object> fetchSelectParams(Map<String, String> originalParams) {
+        log.info("originalParams: {}", originalParams);
         String sanityOnly = originalParams.get(XmlSuiteDetailAttribute.SANITY_ONLY.getName()).toLowerCase();
         String module = originalParams.get(XmlSuiteDetailAttribute.MODULE.getName()).toLowerCase();
         String labelStr = originalParams.containsKey("label") ? originalParams.get("label") : originalParams.get(XmlSuiteDetailAttribute.LABEL_LIST.getName());

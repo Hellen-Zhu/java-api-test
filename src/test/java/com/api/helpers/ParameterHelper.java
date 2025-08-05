@@ -72,28 +72,8 @@ public class ParameterHelper {
         List<TestAPIParameter> autoBaseUrls = (List<TestAPIParameter>) DBUtil.doSqlSessionByEnvironment("postgresql_lif", "auto_baseurl", null);
 
         for (TestAPIParameter testAPIParameter : parameters) {
-            if (testAPIParameter.getScenario().equalsIgnoreCase("PPL Overwrite")
-                    && testAPIParameter.getComponent().equalsIgnoreCase("PPL")) {
-
-                JSONObject parameter = JSON.parseObject(testAPIParameter.getParameter());
-                testAPIParameter.setRequestJSONObject(parameter.getJSONObject("request"));
-                testAPIParameter.setStepId(1);
-                testAPIParameter.setTestCaseDescription(parameter.getString("description"));
-                testAPIParameter.setServiceName("permitted_product_id_svc");
-                testAPIParameter.setClassName("Test_overwritePPL");
-
-                for (TestAPIParameter testAPIParameter1 : autoBaseUrls) {
-                    if (testAPIParameter1.getServiceName().equalsIgnoreCase("permitted_product_id_svc")
-                            && testAPIParameter1.getProfileName().equalsIgnoreCase(testAPIParameter.getProfileName())) {
-                        testAPIParameter.setBaseURL(testAPIParameter1.getBaseURL());
-                    }
-                }
-
-                result.add(testAPIParameter);
-            } else {
                 result.addAll(buildTestAPIParameterList(testAPIParameter, autoEndpoints, autoBaseUrls, scenario_runId));
             }
-        }
         return result;
     }
 
@@ -186,7 +166,6 @@ public class ParameterHelper {
                 parameter.setAfterStepJSONObject(object.getJSONObject("afterStep"));
                 parameter.setRequestJSONObject(object.getJSONObject("request"));
                 parameter.setTestStepDescription(object.getString("description"));
-
                 String serviceName = object.containsKey("serviceName")
                         ? object.getString("serviceName") : TEST_DEFAULT_SERVICE_NAME;
                 parameter.setServiceName(serviceName);
@@ -204,7 +183,6 @@ public class ParameterHelper {
                                     .map(TestAPIParameter::getClassName)
                                     .orElse(TEST_DEFAULT_CLASSNAME)
                     );
-
                     parameter.setBaseURL(
                             autoBaseUrls.stream()
                                     .filter(x -> StringUtils.equalsIgnoreCase(
@@ -216,7 +194,6 @@ public class ParameterHelper {
                                     .orElse(StringUtils.EMPTY)
                     );
                 }
-
                 result.add(parameter);
             }
         } catch (Exception e) {

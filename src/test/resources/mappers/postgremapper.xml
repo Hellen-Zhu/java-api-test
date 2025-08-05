@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="">
+<mapper namespace="com.api.mapper.PostgreMapper">
     <select id="selectBySQL" parameterType="String" resultType="java.util.LinkedHashMap">
         ${sql}
     </select>
@@ -14,9 +14,8 @@
     </select>
 
     <select id="fetchXmlSuiteDetailParameters" resultType="com.api.entities.testng.ReportAttributeInfo">
-        select cs.component,cs.scenarios,cf.suite,cf.projectKey as projectKey,cf.jiraKey,cf.fastDashboardEnv,cf.fastKey,
-        cf.fastProject,cf.receiverAddress,cf.copyAddress,cf.enableFast,
-        cf.enableMondo,cf.enableEmail,cf.enableJira,cf.dailyRunVersion
+        select cs.component,cs.scenarios,cf.suite,cf.receiverAddress,cf.copyAddress,
+        cf.enableMondo,cf.enableEmail,cf.dailyRunVersion
         from (
         select distinct component, string_agg(scenario,',') as scenarios from
         (
@@ -41,7 +40,7 @@
                 </foreach>
             </if>
             <if test="sanityOnly != null and sanityOnly == 'true'">
-                and is_sanity = cast('${sanityOnly}' as boolean)
+                and is_sanity = cast('${sanity}' as boolean)
             </if>
         </where>
         union all
@@ -62,8 +61,8 @@
             <if test="ids!=null and ids.length >0">
                 and id is null
             </if>
-            <if test="sanityOnly != null and sanityOnly == 'true'">
-                and is_sanity = cast('${sanityOnly}' as boolean)
+            <if test="sanity != null and sanity == 'true'">
+                and is_sanity = cast('${sanity}' as boolean)
             </if>
             <if test="labels != null and (components == null or components.length == 0)">
                 and component is null
@@ -85,18 +84,11 @@
         select
         name as suite,
         component,
-        "projectKey" as projectKey,
-        "jiraKey" as jiraKey,
-        "fastDashboardEnv" as fastDashboardEnv,
-        (case when "fastKey" is null then '' else "fastKey" end) as fastKey,
-        "fastProject" as fastProject,
-        "receiverAddress" as receiverAddress,
-        "copyAddress" as copyAddress,
-        "enableFast" as enableFast,
-        "enableMondo" as enableMondo,
-        "enableEmail" as enableEmail,
-        "enableJira" as enableJira,
-        "dailyrunVersion" as dailyRunVersion
+        "receiver_address" as receiverAddress,
+        "copy_address" as copyAddress,
+        "enable_mondo" as enableMondo,
+        "enable_email" as enableEmail,
+        "daily_run_version" as dailyRunVersion
         from auto_configuration
         <where>
             <if test="module!=null and module!=''"> and module = '${module}'</if>
@@ -106,7 +98,7 @@
 
     <select id="auto_case" resultType="com.api.entities.TestAPIParameter">
         select distinct id,profile_name as profileName,parameter::jsonb,component as suite,
-        component as component,is_sanity as isSanity,component_like as componentLike,is_global as isGlobal,
+        component as component,is_sanity as isSanity,component_like as componentLike,
         description as testCaseDescription,issue_key as issueKey,method,path,is_e2e as isE2E,scenario,label
         from auto_case
         <where>
@@ -129,7 +121,7 @@
                 and ( component_like like '%${component}%' or component = '${component}' )
             </if>
             <if test="ids==null and sanityOnly == 'true'">
-                and is_sanity = cast('${sanityOnly}' as boolean)
+                and is_sanity = cast('${sanity}' as boolean)
             </if>
             <if test="scenario!=null">
                 and scenario = '${scenario}'
@@ -138,7 +130,7 @@
     </select>
 
     <select id="auto_baseurl" resultType="com.api.entities.TestAPIParameter" flushCache="false">
-        select service_name as serviceName, replace(lower(region || env),'dev','dailyrefresh') as profileName, base_url as baseURL from auto_baseurl
+        select service_name as serviceName, profile_name as profileName, base_url as baseURL from auto_baseurl
         <where>
             <if test="condition!=null">
                 ${condition}
@@ -173,7 +165,7 @@
 
     <insert id="insertIntoAutoProgress">
         insert into auto_progress(runid,version_id,releaseversion,component,total_cases,task_status,passes,failures,skips,begin_time,end_time,run_by,label) values(
-                                                                                                                                                                      '${runId}','${versionId}','${actualFixVersion}','${component}',${totalCases},#{taskStatus}::auto_progress_status,0,0,0,#{beginTime},null,'${runBy}','${labels}')
+                                                                                                                                                                      '${runId}','${versionId}','${actualFixVersion}','${component}',${totalCases},#{taskStatus},0,0,0,#{beginTime},null,'${runBy}','${labels}')
     </insert>
 
     <update id="updateAutoProgress">
@@ -187,7 +179,7 @@
 
     <update id="updateAutoResultTable">
         update auto_testingresult set suite_result=#{suiteResult}, insertDateTime=#{insertDateTime} where runid='${runId}' and component='${component}'
-    </tupdate>
+    </update>
 
     <select id="queryComponentGroupByModule" resultType="com.api.entities.auto.ComponentProgress">
         select re.group_id as groupId, re.run_id as runId, re.component, a.task_status::text as taskStatus from report_progress re

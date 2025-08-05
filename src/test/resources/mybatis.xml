@@ -3,11 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-    <environments default="common">
-        <environment id="common">
-            <transactionManager type="JDBC">
-                <property name="JDBC.DefaultAutoCommit" value="false"/>
-            </transactionManager>
+    <environments default="postgresql_lif">
+        <environment id="postgresql_lif">
+            <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
                 <property name="driver" value="${driver}"/>
                 <property name="url" value="${url}"/>
@@ -17,6 +15,6 @@
         </environment>
     </environments>
     <mappers>
-        <mapper resource="api_mapper/postgremapper.xml"/>
+        <mapper resource="mappers/postgremapper.xml"/>
     </mappers>
 </configuration>
