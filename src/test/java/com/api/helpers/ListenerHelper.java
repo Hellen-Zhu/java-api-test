@@ -15,7 +15,6 @@ import com.api.entities.testng.XmlSuiteDetailAttribute;
 import com.api.enums.AutomationRunStatus;
 import com.alibaba.fastjson2.JSON;
 import com.github.f4b6a3.ulid.UlidCreator;
-import io.restassured.http.ContentType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +24,6 @@ import org.testng.ITestContext;
 import org.testng.ISuite;
 import org.testng.ITestResult;
 import org.testng.ITestNGMethod;
-import static io.restassured.RestAssured.given;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

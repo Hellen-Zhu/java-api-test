@@ -11,16 +11,7 @@ public class Constants {
 
     public static int TIMEOUT = 30 * 2 * 20;
 
-    // Business Constants
-    public static String ELITE_CURRENCY = "";
-
-    public static String ELITE_POSID = "-1";
-
-    public static String ELITE_SECURITYID = "-1";
-
-    public static String ELITE_TRADEID_NUM = "-1";
-
-    public static String BOOKING_SERVICE = "eh-trade-booking-service";
+    // Business Constants - Removed unused Elite and Booking service constants
 
     // Utils Constants
     public final static List<String> SERVICES_SSLIGNORE = new ArrayList<>(Arrays.asList(

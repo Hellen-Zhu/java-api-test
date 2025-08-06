@@ -1,6 +1,5 @@
 package com.api.utils;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
@@ -13,38 +12,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class DataTypeUtil {
     private static final Logger logger = Logger.getLogger(DataTypeUtil.class);
 
-    public static Map<String, Object> convertObjectToMap(Object obj) {
-        Map<String, Object> map = new HashMap<>();
-        try {
-            Class<?> clazz = obj.getClass();
-            for (Field field : clazz.getDeclaredFields()) {
-                field.setAccessible(true);
-                map.put(field.getName(), field.get(obj));
-            }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        return map;
-    }
-
     public static List<String> splitStringToListByPunctuation(String str, String split) {
         return str == null ? null : Arrays.asList(str.split(split));
-    }
-
-    public static String convertJSONArrayToStringSplitBySemi(Object stringObject) {
-        List<String> list = new ArrayList<>();
-        if (stringObject instanceof String) {
-            list = JSON.parseArray(stringObject.toString()).toJavaList(String.class);
-        }
-        if (stringObject instanceof JSONArray) {
-            list = ((JSONArray) stringObject).toJavaList(String.class);
-        }
-        return list.stream().collect(Collectors.joining(";"));
     }
 
     @SneakyThrows
