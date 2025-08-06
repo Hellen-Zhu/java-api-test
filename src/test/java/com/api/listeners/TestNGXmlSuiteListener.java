@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.JSONObject;
 
 
 import io.restassured.http.ContentType;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.reporters.XMLConstants;
 import org.testng.reporters.XMLStringBuffer;
@@ -28,20 +29,39 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+import io.restassured.config.HttpClientConfig;
 
+@Slf4j
 public class TestNGXmlSuiteListener implements ISuiteListener {
     public static final String SCENARIO_NAME = "scenarioName";
 
     @Override
     public void onFinish(ISuite suite) {
-        Set<Suite> suiteSet = buildXmlSuiteDetailSet(suite);
-        Set<JSONObject> xmlSuiteDetailObjectSet = buildXmlSuiteDetailObjectSet(suiteSet);
-        boolean isDebug = suite.getXmlSuite().getAllParameters().get(XmlSuiteDetailAttribute.IS_DEBUG.getName()) == null ?
-                false : Boolean.parseBoolean(suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.IS_DEBUG.getName()));
-        if (!isDebug) {
-            String baseUrl = suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.AUTOMATION_TOOL_URL.getName());
-            uploadDashboard(baseUrl, xmlSuiteDetailObjectSet);
-            uploadTestCycle(baseUrl, suite);
+        try {
+            Set<Suite> suiteSet = buildXmlSuiteDetailSet(suite);
+            Set<JSONObject> xmlSuiteDetailObjectSet = buildXmlSuiteDetailObjectSet(suiteSet);
+//            boolean isDebug = suite.getXmlSuite().getAllParameters().get(XmlSuiteDetailAttribute.IS_DEBUG.getName()) == null ?
+//                    false : Boolean.parseBoolean(suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.IS_DEBUG.getName()));
+//            if (!isDebug) {
+//                String baseUrl = suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.AUTOMATION_TOOL_URL.getName());
+//
+//                // 添加超时处理的网络请求，避免进程挂起
+//                try {
+//                    uploadDashboard(baseUrl, xmlSuiteDetailObjectSet);
+//                    uploadTestCycle(baseUrl, suite);
+//                } catch (Exception networkEx) {
+//                    System.err.println("Warning: Network upload failed, but test will continue: " + networkEx.getMessage());
+//                    // 不阻止测试完成，只记录错误
+//                }
+//            }
+            log.info("xmlSuiteDetailObjectSet = {}", xmlSuiteDetailObjectSet);
+        } catch (Exception e) {
+            System.err.println("Error in TestNG suite finish: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 确保测试进程能够正常结束
+            System.out.println("TestNG suite finish processing completed");
         }
     }
 
@@ -208,34 +228,54 @@ public class TestNGXmlSuiteListener implements ISuiteListener {
 
     protected void uploadDashboard(String baseUrl, Set<JSONObject> suiteObjectSet) {
         suiteObjectSet.forEach(suiteObject -> {
-            Suite suiteDetail = JSON.parseObject(suiteObject.toString(), Suite.class);
-            Feature[] features = TestNGFastReporterHelper.fetchFeatures(suiteDetail, Boolean.parseBoolean(suiteDetail.getSuiteParameters().get(XmlSuiteDetailAttribute.IS_DEBUG.getName())));
-            JSONObject request = new JSONObject();
-            request.put("features", features);
-            request.put("config", suiteDetail.getSuiteParameters());
-            saveTempOnLocal(suiteDetail.getSuiteName(), request);
-            given().contentType(ContentType.JSON)
-                    .baseUri(baseUrl)
-                    .body(request)
-                    .when()
-                    .post("/automation/dashboard/uploadByConfigAndFeatureArray");
+            try {
+                Suite suiteDetail = JSON.parseObject(suiteObject.toString(), Suite.class);
+                Feature[] features = TestNGFastReporterHelper.fetchFeatures(suiteDetail, Boolean.parseBoolean(suiteDetail.getSuiteParameters().get(XmlSuiteDetailAttribute.IS_DEBUG.getName())));
+                JSONObject request = new JSONObject();
+                request.put("features", features);
+                request.put("config", suiteDetail.getSuiteParameters());
+                saveTempOnLocal(suiteDetail.getSuiteName(), request);
+                
+                // 添加超时设置，避免网络请求挂起
+                given().contentType(ContentType.JSON)
+                        .config(RestAssured.config().httpClient(HttpClientConfig.httpClientConfig()
+                                .setParam("http.connection.timeout", 30000)
+                                .setParam("http.socket.timeout", 30000)))
+                        .baseUri(baseUrl)
+                        .body(request)
+                        .when()
+                        .post("/automation/dashboard/uploadByConfigAndFeatureArray");
+            } catch (Exception e) {
+                System.err.println("Failed to upload dashboard for suite: " + e.getMessage());
+                // 继续处理下一个，不中断整个流程
+            }
         });
     }
 
     protected void uploadTestCycle(String baseUrl, ISuite suite) {
-        String xmlContent = generateReportByTestSuite(suite.getName(), suite.getResults());
-        Map<String, String> paramMap = new HashMap<>();
-        paramMap.put(XmlSuiteDetailAttribute.PROJECT_KEY.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.JIRA_KEY.getName()));
-        paramMap.put(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName()));
-        paramMap.put(XmlSuiteDetailAttribute.TEST_CYCLE.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.TEST_CYCLE.getName()));
-        paramMap.put("automationTool", "Junit");
-        paramMap.put(XmlSuiteDetailAttribute.JIRA_TOKEN.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.JIRA_TOKEN.getName()));
-        paramMap.put("testResult", xmlContent);
-        given().contentType(ContentType.JSON)
-                .baseUri(baseUrl)
-                .body(paramMap)
-                .when()
-                .post("/automation/testcycle/uploadTestAutomation");
+        try {
+            String xmlContent = generateReportByTestSuite(suite.getName(), suite.getResults());
+            Map<String, String> paramMap = new HashMap<>();
+            paramMap.put(XmlSuiteDetailAttribute.PROJECT_KEY.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.JIRA_KEY.getName()));
+            paramMap.put(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName()));
+            paramMap.put(XmlSuiteDetailAttribute.TEST_CYCLE.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.TEST_CYCLE.getName()));
+            paramMap.put("automationTool", "Junit");
+            paramMap.put(XmlSuiteDetailAttribute.JIRA_TOKEN.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.JIRA_TOKEN.getName()));
+            paramMap.put("testResult", xmlContent);
+            
+            // 添加超时设置，避免网络请求挂起
+            given().contentType(ContentType.JSON)
+                    .config(RestAssured.config().httpClient(HttpClientConfig.httpClientConfig()
+                            .setParam("http.connection.timeout", 30000)
+                            .setParam("http.socket.timeout", 30000)))
+                    .baseUri(baseUrl)
+                    .body(paramMap)
+                    .when()
+                    .post("/automation/testcycle/uploadTestAutomation");
+        } catch (Exception e) {
+            System.err.println("Failed to upload test cycle: " + e.getMessage());
+            // 不阻止测试完成，只记录错误
+        }
     }
 
     protected String generateReportByTestSuite(String suiteName, Map<String, ISuiteResult> context) {

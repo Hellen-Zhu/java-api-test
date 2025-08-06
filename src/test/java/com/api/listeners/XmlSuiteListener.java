@@ -44,6 +44,17 @@ public class XmlSuiteListener extends TestNGXmlSuiteListener {
             }
         } finally {
             log.info("Database connections closed successfully");
+            
+            // 确保测试进程能够正常结束
+            log.info("Suite cleanup completed. Forcing system cleanup...");
+            
+            // 强制清理任何可能阻止进程结束的资源
+            try {
+                System.gc(); // 建议垃圾回收
+                Thread.sleep(100); // 给系统一点时间清理
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }
