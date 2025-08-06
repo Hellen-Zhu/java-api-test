@@ -126,36 +126,9 @@ public class ListenerHelper {
                 DBUtil.doSqlSessionByEnvironment("postgresql_lif", "fetchXmlSuiteDetailParameters", params);
 
         log.info("componentScenarioList: {}", componentScenarioList);
-//        String automationToolSVCUrl = ((List<String>) DBUtil.doSqlSessionByEnvironment(
-//                "postgresql_lif", "selectStringListBySQL",
-//                Map.of("sql", "select value from auto_system_variable where config_key = 'automation-tool.service.url'"))).get(0);
-
-// 1. 先将查询结果保存到一个临时的列表中
-        List<String> results = (List<String>) DBUtil.doSqlSessionByEnvironment(
-                "postgresql_lif",
-                "selectStringListBySQL",
-                Map.of("sql", "select value from auto_system_variable where config_key = 'automation-tool.service.url'")
-        );
-
-        String automationToolSVCUrl; // 2. 先准备一个变量并给一个默认值 (例如 null)
-
-// 3. 在访问列表的任何元素之前，必须先检查列表是否为空！
-        if (results != null && !results.isEmpty()) {
-            // 4. 只有在列表不为空的情况下，才安全地获取第一个元素
-            automationToolSVCUrl = results.get(0);
-        } else {
-            automationToolSVCUrl = null;
-            // 5. (重要) 处理在数据库中未找到该配置项的情况
-            // 您可以在这里记录一条错误日志，或者抛出一个更明确的异常
-            log.error("在数据库 auto_system_variable 表中未找到 key 为 'automation-tool.service.url' 的配置！");
-            // 或者抛出异常来中断执行，这比让程序因为 IndexOutOfBoundsException 崩溃要好得多
-            // throw new IllegalStateException("Configuration 'automation-tool.service.url' not found in database.");
-        }
-
-// ... 后续代码可以继续使用 automationToolSvcUrl 变量 ...
         componentScenarioList.forEach(item -> {
             result.put(item.getSuite(),
-                    buildFinalSuiteParamMap(item, originalParams, automationToolSVCUrl));
+                    buildFinalSuiteParamMap(item, originalParams));
         });
 
         // 打印result
@@ -172,6 +145,7 @@ public class ListenerHelper {
         String[] components = StringUtils.splitByWholeSeparator(originalParams.get(XmlSuiteDetailAttribute.COMPONENT.getName()).toLowerCase(), ",");
         String[] scenarios = StringUtils.splitByWholeSeparator(originalParams.get(XmlSuiteDetailAttribute.SCENARIO_LIST.getName()).toLowerCase(), ",");
         String[] ids = StringUtils.splitByWholeSeparator(originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()).toLowerCase(), ",");
+        log.info("originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()): {}", originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()));
         String[] labels = StringUtils.splitByWholeSeparator(labelStr, ",");
 
         Map<String, Object> params = new HashMap<>();
@@ -186,8 +160,7 @@ public class ListenerHelper {
     }
     private static Map<String, String> buildFinalSuiteParamMap(
             ReportAttributeInfo reportAttributeInfo,
-            Map<String, String> originalParams,
-            String automationToolSVCUrl) {
+            Map<String, String> originalParams) {
 
         Map<String, String> result = new HashMap<>();
 
@@ -291,17 +264,6 @@ public class ListenerHelper {
         }
 
         System.out.println("Info: All cases are completed");
-        // String runId = suite.getXmlSuite().getParameters().get(XmlSuiteDetailAttribute.RUN_ID.getName());
-        // List<ComponentProgress> componentProgresses = (List<ComponentProgress>) DBUtil.doSqlSessionByEnvironment("postgresql_lif", "queryComponentGroupByModule",
-        //         Map.of(XmlSuiteDetailAttribute.RUN_ID.getName(), runId));
-
-        // if (componentProgresses.size() > 0) {
-        //     boolean ifAllCompleted = componentProgresses.stream().allMatch(x -> x.getTaskStatus() != null && StringUtils.equalsIgnoreCase(x.getTaskStatus(), "COMPLETED"));
-
-        //     if (ifAllCompleted) {
-        //         System.out.println("Info: All cases are completed");
-        //     }
-        // }
     }
 
     public static void initialAutoProgressForSuiteRun(ISuite suite) {
@@ -311,6 +273,7 @@ public class ListenerHelper {
         if (!isDebug && suite.getAllMethods().size() != 0) {
             String[] fixVersions = StringUtils.splitByWholeSeparator(suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName()), ",");
             String runId = suiteParameters.get(XmlSuiteDetailAttribute.RUN_ID.getName());
+            log.info("runId: {}", runId);
             String component = suiteParameters.get(XmlSuiteDetailAttribute.COMPONENT.getName());
 
             try {

@@ -1,11 +1,9 @@
-INSERT INTO auto_configuration ( name, component, receiver_address, copy_address, enable_mondo, enable_email, daily_run_version, qa, module, labels, sanity, regions, delete_dependency, qalist, enable, service_name)
-VALUES ('Auto-Test','Auto-Test','hellenzhu.ai@gmail.com','hellenzhu.ai@gmail.com',true,true,'QA-DailyRun','Hellen','Auto','Auto-Api-Test',true,'UAT',null,null,true,null);
+INSERT INTO auto_configuration ( name, component, daily_run_version, qa, module, labels, sanity, regions, delete_dependency, qalist, enable, service_name)
+VALUES ('auto_test','auto_test','QA-DailyRun','Hellen','Auto','Auto-Api-Test',true,'UAT',null,null,true,null);
 
-INSERT INTO auto_configuration (name, component, "fastDashboardEnv", "fastKey", "receiverAddress", "copyAddress", "enableFast", "enableMondo", "enableEmail", "fastProject", "dailyRunVersion", qa, module, labels, sanityOnly, regions, delete_dependency, "qaList", migrate, enable, "serviceName", "jiraComponent")
-VALUES ('Auto-Test','Auto-Test',null,null,'hellenzhu.ai@gmail.com','hellenzhu.ai@gmail.com',true,true,true,'Auto-Test','QA-DailyRun','Hellen','Auto','Auto-Api-Test',true,'UAT',null,null,true,true, 'user-svc',null);
+-- Removed INSERT statement with fast/mondo/email related fields that are no longer supported
 
 
-insert into auto_baseurl(service_name,profile_name,base_url)
 insert into auto_baseurl(service_name,profile_name,base_url) values ('user','uat','http://127.0.0.1:8787')
 INSERT INTO auto_system_variable ("config_key", "value") VALUES ('automation-tool.service.url', 'https://auto-test.nsroot.com')
 

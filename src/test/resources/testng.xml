@@ -11,7 +11,7 @@
 <parameter name="component" value="auto_test"/>
 <parameter name="scenario" value="user_login"/>
 <parameter name="scenarios" value=""/>
-<parameter name="ids" value=""/>
+<parameter name="ids" value="1,2"/>
 <parameter name="runId" value=""/>
 <parameter name="releaseVersionList" value="1.0.0"/>
 <parameter name="sanityOnly" value="false"/>

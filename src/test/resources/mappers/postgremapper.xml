@@ -14,8 +14,7 @@
     </select>
 
     <select id="fetchXmlSuiteDetailParameters" resultType="com.api.entities.testng.ReportAttributeInfo">
-        select cs.component,cs.scenarios,cf.suite,cf.receiverAddress,cf.copyAddress,
-        cf.enableMondo,cf.enableEmail,cf.dailyRunVersion
+        select cs.component,cs.scenarios,cf.suite,cf.dailyRunVersion
         from (
         select distinct component, string_agg(scenario,',') as scenarios from
         (
@@ -84,10 +83,6 @@
         select
         name as suite,
         component,
-        "receiver_address" as receiverAddress,
-        "copy_address" as copyAddress,
-        "enable_mondo" as enableMondo,
-        "enable_email" as enableEmail,
         "daily_run_version" as dailyRunVersion
         from auto_configuration
         <where>

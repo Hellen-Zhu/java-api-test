@@ -90,10 +90,6 @@ CREATE TABLE auto_configuration (
                                     id serial primary key,
                                     name VARCHAR(255) NOT NULL,
                                     component VARCHAR(255),
-                                    receiver_address VARCHAR(255),
-                                    copy_address VARCHAR(255),
-                                    enable_mondo BOOLEAN,
-                                    enable_email BOOLEAN,
                                     daily_run_Version VARCHAR(255),
                                     qa VARCHAR(255),
                                     module VARCHAR(50),
@@ -119,4 +115,13 @@ CREATE TABLE report_progress (
                                  processed VARCHAR(10),
                                  module VARCHAR(25),
                                  label VARCHAR(100)
+);
+
+CREATE TABLE auto_testngresult (
+                                   id SERIAL PRIMARY KEY,
+                                   runid CHARACTER VARYING(60),
+                                   component CHARACTER VARYING(50),
+                                   suite_result CHARACTER VARYING,
+                                   insertdatetime TIMESTAMP(6) WITHOUT TIME ZONE,
+                                   config CHARACTER VARYING(255)
 );

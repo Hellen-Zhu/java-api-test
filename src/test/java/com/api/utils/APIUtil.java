@@ -1,11 +1,9 @@
 package com.api.utils;
 
 import com.api.entities.lif.AutoSystemVariable;
-import com.api.enums.DBEnum;
 import com.api.entities.TestAPIParameter;
 import com.api.helpers.Constants;
 import com.api.helpers.ParameterHelper;
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;

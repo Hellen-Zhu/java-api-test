@@ -14,6 +14,7 @@ public class XmlSuiteListener extends TestNGXmlSuiteListener {
         log.info("[TestNG] suite " + suite.getParameter(XmlSuiteDetailAttribute.COMPONENT.getName()) + " starts to run.");
         ListenerHelper.initialAutoProgressForSuiteRun(suite);
         ListenerHelper.initialAutoTestNGResultForSingleIdRun(suite);
+
     }
 
     @Override
