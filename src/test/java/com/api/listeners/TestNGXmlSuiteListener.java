@@ -1,36 +1,23 @@
 package com.api.listeners;
 
 import com.api.annotations.CommentAnnotation;
-import com.api.entities.fast.Feature;
 import com.api.enums.AutomationRunStatus;
 import com.api.entities.testng.*;
-import com.api.helpers.TestNGFastReporterHelper;
 import com.api.utils.DataTypeUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
 
-import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.testng.reporters.XMLConstants;
-import org.testng.reporters.XMLStringBuffer;
-import org.testng.util.TimeUtils;
 import org.testng.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.restassured.RestAssured.given;
-import io.restassured.RestAssured;
-import io.restassured.config.HttpClientConfig;
 
 @Slf4j
 public class TestNGXmlSuiteListener implements ISuiteListener {
@@ -87,15 +74,7 @@ public class TestNGXmlSuiteListener implements ISuiteListener {
         Set<Suite> result = new HashSet<>();
         String[] releaseVersionSet = suiteParameters.get(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName()).split(",");
 
-        if (suiteParameters.get(XmlSuiteDetailAttribute.TEST_CYCLE.getName()) == null) {
-            suiteParameters.put(XmlSuiteDetailAttribute.TEST_CYCLE.getName(), suiteParameters.get(XmlSuiteDetailAttribute.SUITE.getName()));
-        } else {
-            if (suiteParameters.get(XmlSuiteDetailAttribute.TEST_CYCLE.getName()).isEmpty()) {
-                suiteParameters.put(XmlSuiteDetailAttribute.TEST_CYCLE.getName(), suiteParameters.get(XmlSuiteDetailAttribute.SUITE.getName()));
-            } else {
-                suiteParameters.put(XmlSuiteDetailAttribute.TEST_CYCLE.getName(), suiteParameters.get(XmlSuiteDetailAttribute.TEST_CYCLE.getName()));
-            }
-        }
+        // TEST_CYCLE logic removed as it's no longer needed
 
         for (String s : releaseVersionSet) {
             Suite detail = suite.clone();
@@ -224,171 +203,6 @@ public class TestNGXmlSuiteListener implements ISuiteListener {
         result.setStartMillis(ts.getStartMillis());
         result.setEndMillis(ts.getEndMillis());
         return result;
-    }
-
-    protected void uploadDashboard(String baseUrl, Set<JSONObject> suiteObjectSet) {
-        suiteObjectSet.forEach(suiteObject -> {
-            try {
-                Suite suiteDetail = JSON.parseObject(suiteObject.toString(), Suite.class);
-                Feature[] features = TestNGFastReporterHelper.fetchFeatures(suiteDetail, Boolean.parseBoolean(suiteDetail.getSuiteParameters().get(XmlSuiteDetailAttribute.IS_DEBUG.getName())));
-                JSONObject request = new JSONObject();
-                request.put("features", features);
-                request.put("config", suiteDetail.getSuiteParameters());
-                saveTempOnLocal(suiteDetail.getSuiteName(), request);
-                
-                // 添加超时设置，避免网络请求挂起
-                given().contentType(ContentType.JSON)
-                        .config(RestAssured.config().httpClient(HttpClientConfig.httpClientConfig()
-                                .setParam("http.connection.timeout", 30000)
-                                .setParam("http.socket.timeout", 30000)))
-                        .baseUri(baseUrl)
-                        .body(request)
-                        .when()
-                        .post("/automation/dashboard/uploadByConfigAndFeatureArray");
-            } catch (Exception e) {
-                System.err.println("Failed to upload dashboard for suite: " + e.getMessage());
-                // 继续处理下一个，不中断整个流程
-            }
-        });
-    }
-
-    protected void uploadTestCycle(String baseUrl, ISuite suite) {
-        try {
-            String xmlContent = generateReportByTestSuite(suite.getName(), suite.getResults());
-            Map<String, String> paramMap = new HashMap<>();
-            paramMap.put(XmlSuiteDetailAttribute.PROJECT_KEY.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.JIRA_KEY.getName()));
-            paramMap.put(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.ACTUAL_FIXVERSION.getName()));
-            paramMap.put(XmlSuiteDetailAttribute.TEST_CYCLE.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.TEST_CYCLE.getName()));
-            paramMap.put("automationTool", "Junit");
-            paramMap.put(XmlSuiteDetailAttribute.JIRA_TOKEN.getName(), suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.JIRA_TOKEN.getName()));
-            paramMap.put("testResult", xmlContent);
-            
-            // 添加超时设置，避免网络请求挂起
-            given().contentType(ContentType.JSON)
-                    .config(RestAssured.config().httpClient(HttpClientConfig.httpClientConfig()
-                            .setParam("http.connection.timeout", 30000)
-                            .setParam("http.socket.timeout", 30000)))
-                    .baseUri(baseUrl)
-                    .body(paramMap)
-                    .when()
-                    .post("/automation/testcycle/uploadTestAutomation");
-        } catch (Exception e) {
-            System.err.println("Failed to upload test cycle: " + e.getMessage());
-            // 不阻止测试完成，只记录错误
-        }
-    }
-
-    protected String generateReportByTestSuite(String suiteName, Map<String, ISuiteResult> context) {
-        TestSuite testSuite = mergeIntoOneTestSuite(suiteName, context);
-        XMLStringBuffer document = new XMLStringBuffer();
-        document.addComment("Generated by " + getClass().getName());
-        Properties attrs = new Properties();
-        attrs.setProperty(XMLConstants.ATTR_NAME, suiteName);
-        attrs.setProperty(XMLConstants.ATTR_TESTS, testSuite.getTests());
-        attrs.setProperty(XMLConstants.ATTR_TIME, testSuite.getTime());
-        attrs.setProperty(XMLConstants.ATTR_TIMESTAMP, formattedTime());
-        document.push(XMLConstants.TESTSUITE, attrs);
-        testSuite.getTestCaseMap().forEach((name, testCase) -> {
-            Properties atr = new Properties();
-            atr.setProperty(XMLConstants.ATTR_NAME, name);
-            atr.setProperty(XMLConstants.ATTR_CLASSNAME, testCase.getClassName());
-            atr.setProperty(XMLConstants.ATTR_TIME, Double.toString((double) testCase.getTime() / 1000));
-            if (testCase.isIfPass()) {
-                document.addEmptyElement(XMLConstants.TESTCASE, atr);
-            } else {
-                document.push(XMLConstants.TESTCASE, atr);
-                document.addEmptyElement(XMLConstants.FAILURE);
-                document.pop();
-            }
-        });
-        document.pop();
-        return document.toXML();
-    }
-
-    protected TestSuite mergeIntoOneTestSuite(String suiteName, Map<String, ISuiteResult> context) {
-        Set<TestSuite> testSuiteSet = new HashSet<>();
-        context.forEach((name, suiteResult) -> testSuiteSet.add(genrateTestSuite(suiteResult.getTestContext())));
-        AtomicInteger testCount = new AtomicInteger();
-        AtomicReference<Double> suiteTime = new AtomicReference<>(0.0);
-        Map<String, TestCase> testCaseMap = new HashMap<>();
-        AtomicReference<String> timeStamp = new AtomicReference<>("");
-        testSuiteSet.forEach(ts -> {
-            testCount.addAndGet(Integer.parseInt(ts.getTests()));
-            suiteTime.updateAndGet(v -> v + Double.parseDouble(ts.getTime()));
-            testCaseMap.putAll(ts.getTestCaseMap());
-            timeStamp.set(ts.getTimestamp());
-        });
-
-        TestSuite testSuite = new TestSuite();
-        testSuite.setTests(testCount.get() + "");
-        testSuite.setName(suiteName);
-        testSuite.setTime(suiteTime + "");
-        testSuite.setTimestamp(timeStamp.get());
-        testSuite.setTestCaseMap(testCaseMap);
-        return testSuite;
-    }
-
-    protected TestSuite genrateTestSuite(ITestContext context) {
-        TestSuite testSuite = new TestSuite();
-        Map<String, TestCase> testCaseMap = new HashMap<>();
-        Set<ITestResult> allTestResultSet = new HashSet<>();
-        if (context.getSkippedTests() != null) allTestResultSet.addAll(context.getSkippedTests().getAllResults());
-        if (context.getPassedTests() != null) allTestResultSet.addAll(context.getPassedTests().getAllResults());
-        if (context.getFailedTests() != null) allTestResultSet.addAll(context.getFailedTests().getAllResults());
-        // ... Logic to fill testCaseMap from allTestResultSet would go here
-        testSuite.setTimestamp(formattedTime());
-        testSuite.setTime(Double.toString((context.getEndDate().getTime() - context.getStartDate().getTime()) / 1000.0));
-        testSuite.setTestCaseMap(testCaseMap);
-        testSuite.setName(context.getCurrentXmlTest().getName());
-        testSuite.setTests(Integer.toString(testCaseMap.size()));
-        return testSuite;
-    }
-
-    protected void saveTempOnLocal(String suiteName, JSONObject request) {
-        File targetDir = new File("test-output");
-        String fileName = suiteName + TimeUtils.formatTimeInLocalOrSpecifiedTimeZone(System.currentTimeMillis(), "_yyyyMMdd_HHmmss");
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
-        }
-        File requestFile = new File(targetDir, fileName + ".json");
-        try (FileWriter fileWriter = new FileWriter(requestFile)) {
-            fileWriter.write(request.toJSONString());
-        } catch (IOException e) {
-            System.err.println("Failed to save request object to file " + e.getMessage());
-        }
-    }
-
-    protected String formattedTime() {
-        return TimeUtils.formatTimeInLocalOrSpecifiedTimeZone(System.currentTimeMillis(), "yyyy-MM-dd'T'HH:mm:ss z");
-    }
-
-    protected void fillTestCaseMap(Map<String, TestCase> testCaseMap, Set<ITestResult> testResultSet) {
-        for (ITestResult tr : testResultSet) {
-            long elapsedTimeMillis = tr.getEndMillis() - tr.getStartMillis();
-            String testCaseDescription = tr.getName().split("@")[0];
-            String realClassName = tr.getMethod().getRealClass().getName();
-            String className = realClassName.substring(realClassName.lastIndexOf(".") + 1);
-            boolean ifPass = (tr.getStatus() == ITestResult.SUCCESS || (
-                    tr.getStatus() == ITestResult.SKIP &&
-                            (tr.getThrowable().getMessage().equalsIgnoreCase(AutomationRunStatus.SKIPPED_METHOD_NO_NEED.name()) ||
-                                    tr.getThrowable().getMessage().equalsIgnoreCase(AutomationRunStatus.SKIPPED_STEP_NO_NEED.name()))
-            ));
-
-            if (testCaseMap.containsKey(testCaseDescription)) {
-                long originTime = testCaseMap.get(testCaseDescription).getTime();
-                boolean status = testCaseMap.get(testCaseDescription).isIfPass() && ifPass;
-                testCaseMap.get(testCaseDescription).setClassName(className);
-                testCaseMap.get(testCaseDescription).setTime(originTime + elapsedTimeMillis);
-                testCaseMap.get(testCaseDescription).setIfPass(status);
-            } else {
-                TestCase testCase = new TestCase();
-                testCase.setClassName(className);
-                testCase.setName(testCaseDescription);
-                testCase.setTime(elapsedTimeMillis);
-                testCase.setIfPass(ifPass);
-                testCaseMap.put(testCaseDescription, testCase);
-            }
-        }
     }
 
     protected String filterOffNonBreakSpaceFromHTML(String json) {
