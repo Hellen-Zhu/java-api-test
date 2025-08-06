@@ -174,11 +174,11 @@
     </update>
 
     <insert id="insertIntoAutoResultTable">
-        insert into auto_testingresult(runid,component) values( '${runId}','${component}')
+        insert into auto_testngresult(runid,component) values( '${runId}','${component}')
     </insert>
 
     <update id="updateAutoResultTable">
-        update auto_testingresult set suite_result=#{suiteResult}, insertDateTime=#{insertDateTime} where runid='${runId}' and component='${component}'
+        update auto_testngresult set suite_result=#{suiteResult}, insertDateTime=#{insertDateTime} where runid='${runId}' and component='${component}'
     </update>
 
     <select id="queryComponentGroupByModule" resultType="com.api.entities.auto.ComponentProgress">

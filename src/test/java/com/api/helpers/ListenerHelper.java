@@ -317,23 +317,18 @@ public class ListenerHelper {
             return;
         }
 
-        String runId = suite.getXmlSuite().getParameters().get(XmlSuiteDetailAttribute.RUN_ID.getName());
-        List<ComponentProgress> componentProgresses = (List<ComponentProgress>) DBUtil.doSqlSessionByEnvironment("postgresql_lif", "queryComponentGroupByModule",
-                Map.of(XmlSuiteDetailAttribute.RUN_ID.getName(), runId));
+        System.out.println("Info: All cases are completed");
+        // String runId = suite.getXmlSuite().getParameters().get(XmlSuiteDetailAttribute.RUN_ID.getName());
+        // List<ComponentProgress> componentProgresses = (List<ComponentProgress>) DBUtil.doSqlSessionByEnvironment("postgresql_lif", "queryComponentGroupByModule",
+        //         Map.of(XmlSuiteDetailAttribute.RUN_ID.getName(), runId));
 
-        if (componentProgresses.size() > 0) {
-            boolean ifAllCompleted = componentProgresses.stream().allMatch(x -> x.getTaskStatus() != null && StringUtils.equalsIgnoreCase(x.getTaskStatus(), "COMPLETED"));
+        // if (componentProgresses.size() > 0) {
+        //     boolean ifAllCompleted = componentProgresses.stream().allMatch(x -> x.getTaskStatus() != null && StringUtils.equalsIgnoreCase(x.getTaskStatus(), "COMPLETED"));
 
-            if (ifAllCompleted) {
-                given().contentType(ContentType.JSON)
-                        .queryParam("group_id", componentProgresses.get(0).getGroupId())
-                        .when()
-                        .post("http://mondo.nam.nsroot.net:8080/api/automation/email/{group_id}")
-                        .then()
-                        .log()
-                        .body();
-            }
-        }
+        //     if (ifAllCompleted) {
+        //         System.out.println("Info: All cases are completed");
+        //     }
+        // }
     }
 
     public static void initialAutoProgressForSuiteRun(ISuite suite) {

@@ -1,7 +1,7 @@
 package com.api.utils;
 
 import com.api.helpers.DynamicDataSourceContextHolder;
-import com.api.enums.DBEnum;
+
 import com.api.enums.DSEnum;
 
 import org.apache.ibatis.session.SqlSessionManager;
@@ -22,30 +22,50 @@ public class DBUtil {
         }
     }
 
-    public static Object doSqlSessionByEnvironment(String environment, String statement, Map parameter) {
+    @SuppressWarnings("unchecked")
+    public static Object doSqlSessionByEnvironment(String environment, String statement, Map<String, ?> parameter) {
         Object result;
+        SqlSessionManager sqlSessionManager = null;
         try {
             String methodName = "getInstance_" + environment;
             Method method = threadClazz.getMethod(methodName);
-            SqlSessionManager sqlSessionManager = (SqlSessionManager) method.invoke(null);
+            sqlSessionManager = (SqlSessionManager) method.invoke(null);
             sqlSessionManager.openSession();
             result = sqlSessionManager.selectList(statement, parameter);
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
+        } finally {
+            if (sqlSessionManager != null) {
+                try {
+                    sqlSessionManager.close();
+                } catch (Exception e) {
+                    System.err.println("Failed to close SQL session: " + e.getMessage());
+                }
+            }
         }
         return ((List<Object>) result).size() == 0 ? new ArrayList<>() : result;
     }
-    public static Object executeSql(DSEnum DSEnum, String statement, Map parameter) {
+    @SuppressWarnings("unchecked")
+    public static Object executeSql(DSEnum DSEnum, String statement, Map<String, ?> parameter) {
         Object result;
+        SqlSessionManager sqlSessionManager = null;
         try {
             Method method = threadClazz.getMethod(DSEnum.getSqlSessionManager());
-            SqlSessionManager sqlSessionManager = (SqlSessionManager) method.invoke(null);
+            sqlSessionManager = (SqlSessionManager) method.invoke(null);
             sqlSessionManager.openSession();
             result = sqlSessionManager.selectList(statement, parameter);
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
+        } finally {
+            if (sqlSessionManager != null) {
+                try {
+                    sqlSessionManager.close();
+                } catch (Exception e) {
+                    System.err.println("Failed to close SQL session: " + e.getMessage());
+                }
+            }
         }
         return ((List<Object>) result).size() == 0 ? new ArrayList<>() : result;
     }

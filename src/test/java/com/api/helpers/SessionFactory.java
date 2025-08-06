@@ -2,7 +2,7 @@ package com.api.helpers;
 
 //import citi.equities.lifecycleqa.common.utils.RSAUtil;
 import com.api.utils.ConfigUtil;
-import com.api.utils.RSAUtil;
+
 
 import lombok.SneakyThrows;
 import org.apache.ibatis.io.Resources;
@@ -20,6 +20,28 @@ import java.util.Properties;
  */
 public class SessionFactory {
     private static SqlSessionManager SqlSessionManager_postgresql_lif;
+    
+    // 添加关闭钩子来确保资源释放
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            closeAllSessions();
+        }));
+    }
+    
+    public static void closeAllSessions() {
+        if (SqlSessionManager_postgresql_lif != null) {
+            try {
+                if (SqlSessionManager_postgresql_lif.isManagedSessionStarted()) {
+                    SqlSessionManager_postgresql_lif.close();
+                    System.out.println("Database connections closed successfully");
+                } else {
+                    System.out.println("No active database sessions to close");
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to close database connections: " + e.getMessage());
+            }
+        }
+    }
 
     @SneakyThrows
     public static synchronized SqlSessionManager getInstance_postgresql_lif() {
@@ -30,9 +52,20 @@ public class SessionFactory {
     }
 
     private static SqlSessionManager getSqlSessionManager(Properties properties) throws IOException {
-        InputStream inputStream = Resources.getResourceAsStream("mybatis.xml");
-        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream, properties);
-        return SqlSessionManager.newInstance(sqlSessionFactory);
+        InputStream inputStream = null;
+        try {
+            inputStream = Resources.getResourceAsStream("mybatis.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream, properties);
+            return SqlSessionManager.newInstance(sqlSessionFactory);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    System.err.println("Failed to close mybatis.xml input stream: " + e.getMessage());
+                }
+            }
+        }
     }
 
 

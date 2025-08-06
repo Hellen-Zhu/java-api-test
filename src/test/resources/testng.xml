@@ -6,7 +6,7 @@
     <listener class-name="com.api.listeners.XmlSuiteListener"/>
 </listeners>
 
-<parameter name="isDebug" value="true"/>
+<parameter name="isDebug" value="false"/>
 <parameter name="module" value=""/>
 <parameter name="component" value="auto_test"/>
 <parameter name="scenario" value="user_login"/>
