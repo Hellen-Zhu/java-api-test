@@ -29,17 +29,40 @@ public class SessionFactory {
     }
     
     public static void closeAllSessions() {
+        System.out.println("Starting database cleanup process...");
         if (SqlSessionManager_postgresql_lif != null) {
             try {
                 if (SqlSessionManager_postgresql_lif.isManagedSessionStarted()) {
                     SqlSessionManager_postgresql_lif.close();
-                    System.out.println("Database connections closed successfully");
+                    System.out.println("Active database session closed successfully");
                 } else {
                     System.out.println("No active database sessions to close");
                 }
+                
+                // 强制清理资源引用
+                try {
+                    if (SqlSessionManager_postgresql_lif.getConfiguration().getEnvironment().getDataSource() instanceof AutoCloseable) {
+                        ((AutoCloseable) SqlSessionManager_postgresql_lif.getConfiguration().getEnvironment().getDataSource()).close();
+                        System.out.println("DataSource closed successfully");
+                    }
+                } catch (Exception dsEx) {
+                    System.err.println("Warning: Failed to close DataSource: " + dsEx.getMessage());
+                }
+                
             } catch (Exception e) {
                 System.err.println("Failed to close database connections: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                // 确保清理线程本地资源
+                try {
+                    SqlSessionManager_postgresql_lif = null;
+                    System.out.println("SessionFactory cleanup completed");
+                } catch (Exception e) {
+                    System.err.println("Warning during final cleanup: " + e.getMessage());
+                }
             }
+        } else {
+            System.out.println("No SessionFactory instances to clean up");
         }
     }
 

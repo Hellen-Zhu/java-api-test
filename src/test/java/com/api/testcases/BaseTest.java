@@ -4,8 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterClass;
 
 import com.api.entities.TestAPIParameter;
+import com.api.utils.DBUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -46,12 +49,40 @@ public class BaseTest implements ITest {
         }
     }
 
+    @AfterMethod
+    public void afterMethod() {
+        // 清理数据库上下文
+        try {
+            DBUtil.clearJpaDb();
+            log.debug("Database context cleared after test method");
+        } catch (Exception e) {
+            log.warn("Failed to clear database context: " + e.getMessage());
+        }
+        
+        // 清理ThreadLocal
+        if (testName != null) {
+            testName.remove();
+        }
+    }
+    
+    @AfterClass
+    public void afterClass() {
+        log.info("Test class cleanup started");
+        try {
+            // 确保所有数据库连接都被清理
+            DBUtil.clearJpaDb();
+            log.info("Final database cleanup completed");
+        } catch (Exception e) {
+            log.error("Failed during final cleanup: " + e.getMessage());
+        }
+    }
+
     @Override
     public String getTestName() {
         String name = "";
         if(testName != null) {
             name = testName.get();
-            testName.remove();
+            // 不在这里清理ThreadLocal，留给afterMethod处理
         }
         return name;
     }

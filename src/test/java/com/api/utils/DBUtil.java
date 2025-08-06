@@ -26,19 +26,25 @@ public class DBUtil {
     public static Object doSqlSessionByEnvironment(String environment, String statement, Map<String, ?> parameter) {
         Object result;
         SqlSessionManager sqlSessionManager = null;
+        boolean sessionOpened = false;
         try {
             String methodName = "getInstance_" + environment;
             Method method = threadClazz.getMethod(methodName);
             sqlSessionManager = (SqlSessionManager) method.invoke(null);
-            sqlSessionManager.openSession();
+            if (!sqlSessionManager.isManagedSessionStarted()) {
+                sqlSessionManager.openSession();
+                sessionOpened = true;
+            }
             result = sqlSessionManager.selectList(statement, parameter);
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
         } finally {
-            if (sqlSessionManager != null) {
+            if (sqlSessionManager != null && sessionOpened) {
                 try {
-                    sqlSessionManager.close();
+                    if (sqlSessionManager.isManagedSessionStarted()) {
+                        sqlSessionManager.close();
+                    }
                 } catch (Exception e) {
                     System.err.println("Failed to close SQL session: " + e.getMessage());
                 }
@@ -50,18 +56,24 @@ public class DBUtil {
     public static Object executeSql(DSEnum DSEnum, String statement, Map<String, ?> parameter) {
         Object result;
         SqlSessionManager sqlSessionManager = null;
+        boolean sessionOpened = false;
         try {
             Method method = threadClazz.getMethod(DSEnum.getSqlSessionManager());
             sqlSessionManager = (SqlSessionManager) method.invoke(null);
-            sqlSessionManager.openSession();
+            if (!sqlSessionManager.isManagedSessionStarted()) {
+                sqlSessionManager.openSession();
+                sessionOpened = true;
+            }
             result = sqlSessionManager.selectList(statement, parameter);
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
         } finally {
-            if (sqlSessionManager != null) {
+            if (sqlSessionManager != null && sessionOpened) {
                 try {
-                    sqlSessionManager.close();
+                    if (sqlSessionManager.isManagedSessionStarted()) {
+                        sqlSessionManager.close();
+                    }
                 } catch (Exception e) {
                     System.err.println("Failed to close SQL session: " + e.getMessage());
                 }
