@@ -5,7 +5,6 @@ import com.api.utils.DBUtil;
 import com.api.utils.MemoryCacheUtil;
 import com.api.utils.SkipTestUtil;
 import com.api.entities.TestAPIParameter;
-import com.api.entities.auto.ComponentProgress;
 import com.api.entities.lif.AutoProgressStatus;
 import com.api.entities.lif.AutoSystemVariable;
 import com.api.entities.testng.ReportAttributeInfo;

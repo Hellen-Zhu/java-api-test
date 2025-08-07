@@ -39,4 +39,4 @@ logging:
 test:
   timeout: 30000
   retry-count: 3
-  parallel-threads: 5 
+  parallel-threads: 5

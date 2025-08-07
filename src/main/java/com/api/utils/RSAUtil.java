@@ -1,7 +1,5 @@
 package com.api.utils;
 
-import com.api.utils.Base64Util;
-
 import javax.crypto.Cipher;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;

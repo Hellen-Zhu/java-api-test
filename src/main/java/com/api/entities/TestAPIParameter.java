@@ -2,8 +2,6 @@ package com.api.entities;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.api.enums.DBEnum;
-import com.api.enums.DSEnum;
 
 import io.restassured.response.Response;
 import lombok.Data;
