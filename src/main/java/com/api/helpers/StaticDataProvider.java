@@ -15,7 +15,11 @@ import java.util.stream.Collectors;
 public class StaticDataProvider {
     // #region new
     public static Object[] getTestNGObjectArrayForFactoryByService(Map<String, Object> automationParamsMap) {
+        log.info("StaticDataProvider.getTestNGObjectArrayForFactoryByService - input automationParamsMap: {}", automationParamsMap);
+        
         Map<String, Object> params = new HashMap(automationParamsMap);
+        log.info("StaticDataProvider.getTestNGObjectArrayForFactoryByService - params for fetchTestParameterList: {}", params);
+        
         List<TestAPIParameter> testParameters = fetchTestParameterList(params).stream()
                 .distinct()
                 .collect(Collectors.toList());

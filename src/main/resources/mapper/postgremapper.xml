@@ -78,7 +78,17 @@
         </where>
         ) cf ON cs.component = cf.component
     </select>
+    <select id="selectBySQL" parameterType="String" resultType="java.util.LinkedHashMap">
+        ${sql}
+    </select>
 
+    <delete id="deleteBySQL" parameterType="String">
+        ${sql}
+    </delete>
+
+    <select id="selectStringListBySQL" parameterType="String" resultType="java.lang.String">
+        ${sql}
+    </select>
     <select id="auto_case" resultType="com.api.entities.TestAPIParameter">
         select distinct id,profile_name as profileName,parameter::jsonb,component as suite,
         component as component,is_sanity as isSanity,component_like as componentLike,

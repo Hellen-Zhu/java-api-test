@@ -22,8 +22,12 @@ public class TestRunFactory {
     @Parameters({"component", "sanityOnly", "scenario", "ids", "runId", "labels"}) // from xmlTest.parameter
     public Object[] createInstances(String component, String sanityOnly, String scenario, String ids, String runId, @Optional("") String labels) {
         try {
+            log.info("TestRunFactory.createInstances - received labels parameter: '{}'", labels);
+            
             String[] idArray = StringUtils.isEmpty(ids) ? new String[0] : ids.split(",");
             String[] labelArray = StringUtils.isEmpty(labels) ? new String[0] : labels.split(",");
+            
+            log.info("TestRunFactory.createInstances - labelArray after split: {}", (Object) labelArray);
 
             Map<String, Object> automationParamsMap = new HashMap<>();
             automationParamsMap.put(XmlSuiteDetailAttribute.COMPONENT.getName(), component);
@@ -35,6 +39,8 @@ public class TestRunFactory {
 
             if(idArray.length != 0) automationParamsMap.put(XmlSuiteDetailAttribute.ID_LIST.getName(), idArray);
             if(labelArray.length != 0) automationParamsMap.put(XmlSuiteDetailAttribute.LABEL_LIST.getName(), labelArray);
+            
+            log.info("TestRunFactory.createInstances - final automationParamsMap: {}", automationParamsMap);
 
             return StaticDataProvider.getTestNGObjectArrayForFactoryByService(automationParamsMap);
 

@@ -190,7 +190,7 @@ public class ListenerHelper {
         String isDebug = originalParams.get(XmlSuiteDetailAttribute.IS_DEBUG.getName());
         String releaseVersions = originalParams.get(XmlSuiteDetailAttribute.RELEASE_VERSION_LIST.getName());
         String sanityOnly = originalParams.get(XmlSuiteDetailAttribute.SANITY_ONLY.getName());
-        String labels = originalParams.containsKey("label") ? originalParams.get(XmlSuiteDetailAttribute.LABEL_LIST.getName()) : "";
+        String labels = originalParams.containsKey("label") ? originalParams.get("label") : originalParams.get(XmlSuiteDetailAttribute.LABEL_LIST.getName());
 
         result.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(),
                 Objects.isNull(isDebug) || StringUtils.isEmpty(isDebug) ? "true" : isDebug);

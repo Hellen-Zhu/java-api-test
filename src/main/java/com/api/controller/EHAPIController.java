@@ -33,19 +33,22 @@ public class EHAPIController {
 
     @Operation(summary = "Custom Automation")
     @PostMapping(value = "/runAutomationBaseOnIdList", produces = "application/json;charset=UTF-8")
-    public Map<String, String> runAutomationBaseOnIdList(@RequestBody List<Integer> idList) {
+    public Object runAutomationBaseOnIdList(@RequestBody List<Integer> idList) {
         log.info("Start to run automation based on Id with list: " + idList);
         Map<String, String> result = new HashMap<>();
+        Map<Integer, String> idToRunIdMap = new HashMap<>();
         Set<String> runIdSet = new HashSet<>();
 
         idList.forEach(id -> {
             String runId = UlidCreator.getUlid().toString();
             runIdSet.add(runId);
+            idToRunIdMap.put(id, runId);
             JSONObject requestObject = new JSONObject();
             requestObject.put(XmlSuiteDetailAttribute.ID_LIST.getName(), id);
-            requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), true);
+            requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), false);
             requestObject.put(XmlSuiteDetailAttribute.SANITY_ONLY.getName(), Boolean.FALSE.toString());
             requestObject.put(XmlSuiteDetailAttribute.RUN_ID.getName(), runId);
+            requestObject.put(XmlSuiteDetailAttribute.RUN_BY.getName(), "api-run");
             testNGService.runWithAsync(requestObject);
         });
 
@@ -56,9 +59,13 @@ public class EHAPIController {
                 result.put(suiteResult.get("component").toString(), runId);
             }
         });
-        return result;
+        
+        // 创建包含每个ID对应runId的响应对象
+        JSONObject responseObject = new JSONObject();
+        responseObject.put("idToRunIdMap", idToRunIdMap);
+        
+        return responseObject;
     }
-
     @Operation(summary = "Custom Automation")
     @PostMapping(value = "/runAutomationBaseOnComponent", produces = "application/json;charset=UTF-8")
     public Map<String, String> runAutomationBaseOnComponent(@RequestBody JSONObject requestBody) throws Exception {
@@ -94,7 +101,9 @@ public class EHAPIController {
         if (!message.toString().isEmpty()) return message;
 
         for (JSONObject finalRequestBody : finalRequestBodySet) {
+            log.info("buildFinalRequestBodySet - finalRequestBody before buildFinalRequestRunForComponentRun: {}", finalRequestBody);
             buildFinalRequestRunForComponentRun(requestBody, finalRequestBody);
+            log.info("buildFinalRequestBodySet - finalRequestBody after buildFinalRequestRunForComponentRun: {}", finalRequestBody);
             testNGService.runWithAsync(finalRequestBody);
         }
 
@@ -133,7 +142,6 @@ public class EHAPIController {
         if (!message.toString().isEmpty()) return new HashSet<>();
 
         resultObject.put(XmlSuiteDetailAttribute.LABEL_LIST.getName(), label);
-
         Set<String> componentSet = buildFinalRequestComponentArr(components, label);
         if (componentSet.size() == 0) {
             message.append("There are no related Test Cases for component [\"+components+\"]!");
@@ -153,8 +161,20 @@ public class EHAPIController {
         String sanityOnly = requestBody.containsKey(XmlSuiteDetailAttribute.SANITY_ONLY.getName()) ?
                 requestBody.getString(XmlSuiteDetailAttribute.SANITY_ONLY.getName()).toLowerCase() : Boolean.FALSE.toString();
 
-        requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), Boolean.FALSE.toString());
+        // 设置isDebug参数，如果请求中有isDebug则使用请求中的值，否则默认为false
+        if (requestBody.containsKey("isDebug")) {
+            requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), requestBody.getString("isDebug"));
+        } else {
+            requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), Boolean.FALSE.toString());
+        }
+        
         requestObject.put(XmlSuiteDetailAttribute.SANITY_ONLY.getName(), sanityOnly);
+
+        if (requestBody.containsKey("runBy")) {
+            requestObject.put(XmlSuiteDetailAttribute.RUN_BY.getName(), requestBody.getString("runBy"));
+        } else {
+            requestObject.put(XmlSuiteDetailAttribute.RUN_BY.getName(), "api-run");
+        }
 
         if (requestBody.containsKey("scenarios")) {
             requestObject.put(XmlSuiteDetailAttribute.SCENARIO_LIST.getName(), requestBody.getString("scenarios"));
@@ -162,13 +182,12 @@ public class EHAPIController {
         if (requestBody.containsKey("fixVersion")) {
             requestObject.put(XmlSuiteDetailAttribute.RELEASE_VERSION_LIST.getName(), requestBody.getString("fixVersion"));
         }
-        if (requestBody.containsKey("runBy")) {
-            requestObject.put(XmlSuiteDetailAttribute.RUN_BY.getName(), requestBody.getString("runBy"));
-        }
         if (requestBody.containsKey("versionId")) {
             requestObject.put(XmlSuiteDetailAttribute.VERSION_ID.getName(), requestBody.getString("versionId"));
         }
-        if (requestBody.containsKey("label")) {
+        // 注意：这里不需要再次设置label，因为在buildFinalRequestBodySet中已经设置了
+        // 如果requestObject中已经有label，就保持；如果没有，则从requestBody中获取
+        if (!requestObject.containsKey(XmlSuiteDetailAttribute.LABEL_LIST.getName()) && requestBody.containsKey("label")) {
             requestObject.put(XmlSuiteDetailAttribute.LABEL_LIST.getName(), requestBody.getString("label"));
         }
     }
