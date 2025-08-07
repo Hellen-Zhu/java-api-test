@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.Optional;
 
 @Slf4j
 public class ListenerHelper {
@@ -136,14 +137,38 @@ public class ListenerHelper {
 
     private static Map<String, Object> fetchSelectParams(Map<String, String> originalParams) {
         log.info("originalParams: {}", originalParams);
-        String sanityOnly = originalParams.get(XmlSuiteDetailAttribute.SANITY_ONLY.getName()).toLowerCase();
-        String module = originalParams.get(XmlSuiteDetailAttribute.MODULE.getName()).toLowerCase();
-        String labelStr = originalParams.containsKey("label") ? originalParams.get("label") : originalParams.get(XmlSuiteDetailAttribute.LABEL_LIST.getName());
-        String[] components = StringUtils.splitByWholeSeparator(originalParams.get(XmlSuiteDetailAttribute.COMPONENT.getName()).toLowerCase(), ",");
-        String[] scenarios = StringUtils.splitByWholeSeparator(originalParams.get(XmlSuiteDetailAttribute.SCENARIO_LIST.getName()).toLowerCase(), ",");
-        String[] ids = StringUtils.splitByWholeSeparator(originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()).toLowerCase(), ",");
-        log.info("originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()): {}", originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()));
-        String[] labels = StringUtils.splitByWholeSeparator(labelStr, ",");
+        
+        // 安全地获取并转换为小写，避免空指针异常
+        String sanityOnly = Optional.ofNullable(originalParams.get(XmlSuiteDetailAttribute.SANITY_ONLY.getName()))
+            .map(String::toLowerCase)
+            .orElse(null);
+            
+        String module = Optional.ofNullable(originalParams.get(XmlSuiteDetailAttribute.MODULE.getName()))
+            .map(String::toLowerCase)
+            .orElse(null);
+            
+        String labelStr = originalParams.containsKey("label") 
+            ? originalParams.get("label") 
+            : originalParams.get(XmlSuiteDetailAttribute.LABEL_LIST.getName());
+            
+        String[] components = Optional.ofNullable(originalParams.get(XmlSuiteDetailAttribute.COMPONENT.getName()))
+            .map(s -> StringUtils.splitByWholeSeparator(s.toLowerCase(), ","))
+            .orElse(null);
+            
+        String[] scenarios = Optional.ofNullable(originalParams.get(XmlSuiteDetailAttribute.SCENARIO_LIST.getName()))
+            .map(s -> StringUtils.splitByWholeSeparator(s.toLowerCase(), ","))
+            .orElse(null);
+            
+        String[] ids = Optional.ofNullable(originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()))
+            .map(s -> StringUtils.splitByWholeSeparator(s.toLowerCase(), ","))
+            .orElse(null);
+            
+        log.info("originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()): {}", 
+            originalParams.get(XmlSuiteDetailAttribute.ID_LIST.getName()));
+            
+        String[] labels = Optional.ofNullable(labelStr)
+            .map(s -> StringUtils.splitByWholeSeparator(s, ","))
+            .orElse(null);
 
         Map<String, Object> params = new HashMap<>();
         if (module != null) params.put(XmlSuiteDetailAttribute.MODULE.getName(), module);

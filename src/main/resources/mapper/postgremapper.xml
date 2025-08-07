@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.api.mapper.PostgreMapper">
-    <select id="selectBySQL" parameterType="String" resultType="java.util.LinkedHashMap">
-        ${sql}
-    </select>
-
-    <delete id="deleteBySQL" parameterType="String">
-        ${sql}
-    </delete>
-
-    <select id="selectStringListBySQL" parameterType="String" resultType="java.lang.String">
-        ${sql}
-    </select>
-
     <select id="fetchXmlSuiteDetailParameters" resultType="com.api.entities.testng.ReportAttributeInfo">
         select cs.component,cs.scenarios,cf.suite,cf.dailyRunVersion
         from (
@@ -164,8 +152,7 @@
     </insert>
 
     <update id="updateAutoProgress">
-        update auto_progress set ${condition}
-        where runid='${runId}' and component='${component}'
+        update auto_progress set ${condition} where runid='${runId}' and component='${component}'
     </update>
 
     <insert id="insertIntoAutoResultTable">

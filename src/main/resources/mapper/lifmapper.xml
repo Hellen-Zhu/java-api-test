@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.api.mapper.LIFMapper">
+
+    <select id="selectAutoCaseTemplate" resultType="java.util.HashMap">
+        select id, component, "templateName", script::jsonb
+        from auto_case_template
+        <where>
+            <if test="component !=null and component !=''">
+                and component = #{component}
+            </if>
+            <if test="templateName !=null and templateName !=''">
+                and "templateName" = #{templateName}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAutoCaseAudits" resultType="java.util.HashMap">
+        select id,"runId", suite, scenario, region,env,"issueKey",summary,"runStatus", "testData"::jsonb,config::jsonb,"runMode","bugKey"
+        from auto_case_audit
+        <where>
+            <if test="id !=null and id !=''">
+                and id = #{id}
+            </if>
+            <if test="runId !=null and runId !=''">
+                and "runId" = #{runId}
+            </if>
+            <if test="suite !=null and suite !=''">
+                and suite = #{suite}
+            </if>
+            <if test="scenario !=null and scenario !=''">
+                and scenario = #{scenario}
+            </if>
+            <if test="region !=null and region !=''">
+                and region = #{region}
+            </if>
+            <if test="env !=null and env !=''">
+                and env = #{env}
+            </if>
+            <if test="issueKey !=null and issueKey !=''">
+                and "issueKey" = #{issueKey}
+            </if>
+            <if test="summary !=null and summary !=''">
+                and summary = #{summary}
+            </if>
+            <if test="runStatus !=null and runStatus !=''">
+                and "runStatus" = #{runStatus}::automation_run_status
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAutoCaseConfigurations" resultType="java.util.HashMap">
+        select *
+        from auto_configuration
+        <where>
+            <if test="id !=null and id !=''">
+                and id = #{id}
+            </if>
+            <if test="name !=null and name !=''">
+                and name = #{name}
+            </if>
+            <if test="projectKey !=null and projectKey !=''">
+                and "projectKey" = #{projectKey}
+            </if>
+            <if test="jiraKey !=null and jiraKey !=''">
+                and "jiraKey" = #{jiraKey}
+            </if>
+            <if test="fastProject !=null and fastProject !=''">
+                and "fastProject" = #{fastProject}
+            </if>
+            <if test="module !=null and module !=''">
+                and module = #{module}
+            </if>
+            <if test="labels !=null and labels !=''">
+                and labels = #{labels}
+            </if>
+            <if test="component !=null and component !=''">
+                and component = #{component}
+            </if>
+        </where>
+    </select>
+
+</mapper>

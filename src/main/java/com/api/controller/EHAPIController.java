@@ -25,8 +25,6 @@ import java.util.Set;
 @RestController
 public class EHAPIController {
 
-    private String EH_API_MAIN_CLASS = "citi.equities.lifecycleqa.EHAPITestNG";
-
     @Autowired
     private LIFMapper lifMapper;
 
@@ -44,7 +42,6 @@ public class EHAPIController {
             String runId = UlidCreator.getUlid().toString();
             runIdSet.add(runId);
             JSONObject requestObject = new JSONObject();
-            requestObject.put("mainClass", EH_API_MAIN_CLASS);
             requestObject.put(XmlSuiteDetailAttribute.ID_LIST.getName(), id);
             requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), true);
             requestObject.put(XmlSuiteDetailAttribute.SANITY_ONLY.getName(), Boolean.FALSE.toString());
@@ -156,7 +153,6 @@ public class EHAPIController {
         String sanityOnly = requestBody.containsKey(XmlSuiteDetailAttribute.SANITY_ONLY.getName()) ?
                 requestBody.getString(XmlSuiteDetailAttribute.SANITY_ONLY.getName()).toLowerCase() : Boolean.FALSE.toString();
 
-        requestObject.put("mainClass", EH_API_MAIN_CLASS);
         requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), Boolean.FALSE.toString());
         requestObject.put(XmlSuiteDetailAttribute.SANITY_ONLY.getName(), sanityOnly);
 

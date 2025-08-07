@@ -19,13 +19,4 @@ public interface LIFMapper {
     @Select("select ${selectCondition} from auto_case where enable = true and (${filterCondition})")
     List<LinkedHashMap> fetchAutoCaseByDynamicCondition(String selectCondition, String filterCondition);
 
-    @Select("select * from auto_qa_information")
-    List<LinkedHashMap> fetchQAInformation();
-
-    List<JSONObject> selectAutoCaseTemplate(JSONObject queryParameter);
-
-    List<JSONObject> selectAutoCaseAudits(JSONObject queryParameter);
-
-    List<JSONObject> selectAutoCaseConfigurations(JSONObject queryParameter);
-
 }

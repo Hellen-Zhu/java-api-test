@@ -23,14 +23,6 @@ repositories {
     mavenCentral()
 }
 
-//sourceSets {
-//    main{
-//        java {
-//            srcDirs 'src/main/java', 'src/test/java'
-//        }
-//        resources 'src/main/resources','src/test/resources'
-//    }
-//}
 dependencies {
     // === 核心业务依赖 (Implementation) ===
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -75,6 +67,6 @@ dependencies {
 
 tasks.named('test') {
     useTestNG() {
-        suites "src/test/resources/testng.xml"
+        suites "src/resources/testng.xml"
     }
 }

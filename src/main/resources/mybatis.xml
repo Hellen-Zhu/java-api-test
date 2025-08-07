@@ -23,6 +23,6 @@
         </environment>
     </environments>
     <mappers>
-        <mapper resource="mappers/postgremapper.xml"/>
+        <mapper resource="mapper/postgremapper.xml"/>
     </mappers>
 </configuration>

@@ -48,7 +48,7 @@ public class DynamicDataSourceRouting extends AbstractRoutingDataSource {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl(url);
         dataSource.setUsername(username);
-        dataSource.setPassword(password.isEmpty() ? "" : RSAUtil.decrypt(password));
+        dataSource.setPassword(password.isEmpty() ? "" : password);
         return dataSource;
     }
 
