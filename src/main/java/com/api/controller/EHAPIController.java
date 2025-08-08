@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-@Tag(name = "[EH.API] Automation Testing")
+@Tag(name = "[Auto.API] Automation Testing")
 @RestController
 public class EHAPIController {
 
@@ -60,7 +60,7 @@ public class EHAPIController {
             }
         });
         
-        // 创建包含每个ID对应runId的响应对象
+        // Create a response object including the mapping from each id to its runId
         JSONObject responseObject = new JSONObject();
         responseObject.put("idToRunIdMap", idToRunIdMap);
         
@@ -161,7 +161,7 @@ public class EHAPIController {
         String sanityOnly = requestBody.containsKey(XmlSuiteDetailAttribute.SANITY_ONLY.getName()) ?
                 requestBody.getString(XmlSuiteDetailAttribute.SANITY_ONLY.getName()).toLowerCase() : Boolean.FALSE.toString();
 
-        // 设置isDebug参数，如果请求中有isDebug则使用请求中的值，否则默认为false
+        // Set isDebug parameter: use the value from request if present, otherwise default to false
         if (requestBody.containsKey("isDebug")) {
             requestObject.put(XmlSuiteDetailAttribute.IS_DEBUG.getName(), requestBody.getString("isDebug"));
         } else {

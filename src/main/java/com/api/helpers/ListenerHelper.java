@@ -129,7 +129,7 @@ public class ListenerHelper {
                     buildFinalSuiteParamMap(item, originalParams));
         });
 
-        // 打印result
+        // Print result
         log.info("result: {}", result);
         
         return result;
@@ -138,7 +138,7 @@ public class ListenerHelper {
     private static Map<String, Object> fetchSelectParams(Map<String, String> originalParams) {
         log.info("originalParams: {}", originalParams);
         
-        // 安全地获取并转换为小写，避免空指针异常
+        // Safely retrieve and convert to lowercase to avoid NPE
         String sanityOnly = Optional.ofNullable(originalParams.get(XmlSuiteDetailAttribute.SANITY_ONLY.getName()))
             .map(String::toLowerCase)
             .orElse(null);
@@ -281,7 +281,7 @@ public class ListenerHelper {
         boolean isDebug = Boolean.parseBoolean(suiteParameters.get(XmlSuiteDetailAttribute.IS_DEBUG.getName()));
 
         if (isDebug && suite.getAllMethods().size() != 0) {
-            // 在 Debug 模式下且有测试方法时，不执行此逻辑
+            // In debug mode with test methods, do not execute this logic
             return;
         }
 

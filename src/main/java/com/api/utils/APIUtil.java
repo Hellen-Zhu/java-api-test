@@ -262,9 +262,9 @@ public class APIUtil {
         StringBuilder url = Optional.ofNullable(testAPIParameter.getBaseURL()).map(StringBuilder::new).orElse(null);
         StringBuilder path = new StringBuilder();
 
-        if (testAPIParameter.getRequestJSONObject().containsKey("pathParams")) {
+            if (testAPIParameter.getRequestJSONObject().containsKey("pathParams")) {
             JSONObject pathParams = testAPIParameter.getRequestJSONObject().getJSONObject("pathParams");
-            // 假设 pathParamsItems 来自 testAPIParameter 的某个字段
+            // Assume pathParamsItems are derived from a field in testAPIParameter
             String[] pathParamsItems = testAPIParameter.getPath().split("/");
             for (int i = 0; i < pathParamsItems.length; i++) {
                 if (!pathParamsItems[i].contains("{")) {
@@ -285,7 +285,7 @@ public class APIUtil {
             for (String key : params.keySet()) {
                 url.append(key).append("=").append(params.get(key)).append("&");
             }
-            // 移除最后一个多余的 '&'
+            // Remove the trailing '&'
             url = new StringBuilder(url.substring(0, url.length() - 1));
         }
 

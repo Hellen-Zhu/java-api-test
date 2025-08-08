@@ -20,7 +20,7 @@ import java.util.Properties;
 public class SessionFactory {
     private static SqlSessionManager SqlSessionManager_postgresql_lif;
     
-    // 添加关闭钩子来确保资源释放
+    // Add shutdown hook to ensure resources are released
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             closeAllSessions();
@@ -38,7 +38,7 @@ public class SessionFactory {
                     System.out.println("No active database sessions to close");
                 }
                 
-                // 强制清理资源引用
+                // Force clearing resource references
                 try {
                     if (SqlSessionManager_postgresql_lif.getConfiguration().getEnvironment().getDataSource() instanceof AutoCloseable) {
                         ((AutoCloseable) SqlSessionManager_postgresql_lif.getConfiguration().getEnvironment().getDataSource()).close();
@@ -52,7 +52,7 @@ public class SessionFactory {
                 System.err.println("Failed to close database connections: " + e.getMessage());
                 e.printStackTrace();
             } finally {
-                // 确保清理线程本地资源
+                // Ensure thread-local resources are cleaned
                 try {
                     SqlSessionManager_postgresql_lif = null;
                     System.out.println("SessionFactory cleanup completed");
@@ -98,10 +98,10 @@ public class SessionFactory {
         properties.setProperty("driver", ConfigUtil.getProperty(prefix + "driver"));
         properties.setProperty("url", ConfigUtil.getProperty(prefix + "url"));
         properties.setProperty("username", ConfigUtil.getProperty(prefix + "username"));
-        // 注意：我们现在直接从 yml 读取明文密码，不再需要 RSA 解密
+        // Note: we read plain password from yml now; RSA decryption is not needed
         properties.setProperty("password", ConfigUtil.getProperty(prefix + "password"));
 
-        // 验证一下确保关键属性不为null
+        // Validate that critical properties are not null
         if (properties.getProperty("url") == null) {
             throw new IllegalStateException("Database URL is null for prefix: " + prefix);
         }

@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: auto-api-service API (YAML)
+  version: 1.0.0
+  description: API definitions loaded from YAML for Swagger UI
+servers:
+  - url: http://localhost:8080
+    description: Local server
+paths:
+  /runAutomationBaseOnIdList:
+    post:
+      summary: Custom Automation
+      description: Trigger automation by a list of case IDs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+            examples:
+              sample:
+                value: [1,2]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idToRunIdMap:
+                    type: object
+                    additionalProperties:
+                      type: string
+  /runAutomationBaseOnComponent:
+    post:
+      summary: Custom Automation
+      description: Trigger automation by component list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunByComponentsRequest'
+            examples:
+              sample:
+                value:
+                  components: "auto_test"
+                  isDebug: false
+                  scenarios: ""
+                  fixVersion: "1.2.3"
+                  runBy: "api-run"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  componentRunIdMap:
+                    type: string
+  /runAutomationBaseOnLabel:
+    post:
+      summary: Custom Automation
+      description: Trigger automation by label and optional components
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunByLabelRequest'
+            examples:
+              sample:
+                value:
+                  label: "regression"
+                  isDebug: false
+                  fixVersion: "1.2.3"
+                  runBy: "api-run"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+components:
+  schemas:
+    RunByComponentsRequest:
+      type: object
+      properties:
+        components:
+          type: string
+          description: Comma-separated components
+        isDebug:
+          type: boolean
+        scenarios:
+          type: string
+        fixVersion:
+          type: string
+        runBy:
+          type: string
+    RunByLabelRequest:
+      type: object
+      properties:
+        label:
+          type: string
+        components:
+          type: string
+        isDebug:
+          type: boolean
+        scenarios:
+          type: string
+        fixVersion:
+          type: string
+        runBy:
+          type: string

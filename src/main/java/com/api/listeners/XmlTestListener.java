@@ -28,8 +28,9 @@ public class XmlTestListener implements ITestListener {
         // No-op
     }
 
-//    它会准备测试用例的详情 (prepareTestCaseDetailForMainTestMethod)，
-//    并且用测试用例的描述来改变测试的名称 (changeTestNameWithTestCaseDescription)。这让你的测试报告更具可读性。
+//    It prepares the details of the test case (prepareTestCaseDetailForMainTestMethod)
+//    and changes the test name with the test case description (changeTestNameWithTestCaseDescription)
+//    to make the report more readable.
     @SneakyThrows
     @Override
     public void onTestStart(ITestResult res) {
@@ -37,8 +38,9 @@ public class XmlTestListener implements ITestListener {
         ListenerHelper.changeTestNameWithTestCaseDescription(res);
     }
 
-//    无论测试结果如何，它都会把日志 (fillLogIntoTestResultAttribute)
-//    和其他信息 (fillOtherIntoTestResultAttribute) 填充到测试结果中，并更新测试用例的进度 (addTestCaseProgress)。
+//    Regardless of the result, it fills logs (fillLogIntoTestResultAttribute)
+//    and other information (fillOtherIntoTestResultAttribute) into the test result,
+//    and updates test case progress (addTestCaseProgress).
     @SneakyThrows
     @Override
     public void onTestSuccess(ITestResult res) {

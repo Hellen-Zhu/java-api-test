@@ -33,7 +33,8 @@ public class StaticDataProvider {
         return ParameterHelper.getFinalTestParameterList(parameters, map.get(XmlSuiteDetailAttribute.RUN_ID.getName()).toString());
     }
 
-    // 负责将从数据库查出来的测试用例信息（List<TestAPIParameter>），转换成真正的测试对象数组
+    // Convert the test case information fetched from the database (List<TestAPIParameter>)
+    // into the actual array of test objects
     private static Object[] getFinalTestParameterArray(List<TestAPIParameter> testAPIParameters) {
         Object[] resultArray = new Object[testAPIParameters.size()];
         for (int i = 0; i < testAPIParameters.size(); i++) {

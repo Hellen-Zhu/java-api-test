@@ -8,7 +8,7 @@ public class ConfigUtil {
 
     private static final Map<String, Object> config = new ConcurrentHashMap<>();
 
-    // 使用静态代码块，在类加载时只读取一次配置文件
+    // Use a static block to load configuration once when the class is loaded
     static {
         try {
             Yaml yaml = new Yaml();
@@ -23,16 +23,16 @@ public class ConfigUtil {
                 config.putAll(loadedConfig);
             }
         } catch (Exception e) {
-            // 在实际项目中，这里应该使用日志框架记录错误
+            // In production, prefer logging framework for errors
             System.err.println("Failed to load application.yml");
             e.printStackTrace();
         }
     }
 
     /**
-     * 根据点分割的 key 获取属性值，例如 "ehapi.db.lif.uat.driver"
-     * @param key 属性键
-     * @return 属性值，如果找不到则返回 null
+     * Get property value by dot-separated key, e.g. "ehapi.db.lif.uat.driver"
+     * @param key property key
+     * @return property value, or null if not found
      */
     @SuppressWarnings("unchecked")
     public static String getProperty(String key) {

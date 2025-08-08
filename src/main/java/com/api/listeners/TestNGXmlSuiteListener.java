@@ -28,26 +28,12 @@ public class TestNGXmlSuiteListener implements ISuiteListener {
         try {
             Set<Suite> suiteSet = buildXmlSuiteDetailSet(suite);
             Set<JSONObject> xmlSuiteDetailObjectSet = buildXmlSuiteDetailObjectSet(suiteSet);
-//            boolean isDebug = suite.getXmlSuite().getAllParameters().get(XmlSuiteDetailAttribute.IS_DEBUG.getName()) == null ?
-//                    false : Boolean.parseBoolean(suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.IS_DEBUG.getName()));
-//            if (!isDebug) {
-//                String baseUrl = suite.getXmlSuite().getParameter(XmlSuiteDetailAttribute.AUTOMATION_TOOL_URL.getName());
-//
-//                // 添加超时处理的网络请求，避免进程挂起
-//                try {
-//                    uploadDashboard(baseUrl, xmlSuiteDetailObjectSet);
-//                    uploadTestCycle(baseUrl, suite);
-//                } catch (Exception networkEx) {
-//                    System.err.println("Warning: Network upload failed, but test will continue: " + networkEx.getMessage());
-//                    // 不阻止测试完成，只记录错误
-//                }
-//            }
             log.info("xmlSuiteDetailObjectSet = {}", xmlSuiteDetailObjectSet);
         } catch (Exception e) {
             System.err.println("Error in TestNG suite finish: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            // 确保测试进程能够正常结束
+            // Ensure the test process can end normally
             System.out.println("TestNG suite finish processing completed");
         }
     }

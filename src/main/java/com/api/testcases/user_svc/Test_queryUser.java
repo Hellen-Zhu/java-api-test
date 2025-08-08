@@ -26,9 +26,8 @@ public class Test_queryUser {
         return new Test_queryUser(testParameter);
     }
 
-    @Test(description = "Trigger query user api with authorization token")
+    @Test(description = "Trigger query user API with authorization token")
     public void trigger_query_user_API(ITestContext testContext) {
-        // 从缓存中获取之前存储的token（优先 token，回退 ADMIN_TOKEN）
         String accessToken = null;
         Object tokenObj = memoryCacheUtil.get("token");
         if (tokenObj != null) {
@@ -41,10 +40,9 @@ public class Test_queryUser {
             log.warn("No token found in cache ");
         }
 
-        // 使用包含 accessToken 的重载方法，让 APIUtil 走 initAuthBearerRequest 自动加 Bearer
         response = APIUtil.requestAPI(testParameter, testContext, accessToken);
 
-        // 响应校验与日志
+        // Validate response and log
         ResponseValidator.validateResponse(testParameter, response);
         responseJSON = JSONObject.parseObject(response.asString());
         log.info("Query user response: {}", responseJSON);

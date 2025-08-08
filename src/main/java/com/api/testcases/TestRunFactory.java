@@ -16,8 +16,9 @@ import java.util.Map;
 @Listeners(MethodInterceptor.class)
 public class TestRunFactory {
 
-//    这个工厂的核心思想是：收集 testng.xml 中定义的所有筛选条件，
-//    将它们打包，然后交给一个专门的“数据提供者”(StaticDataProvider)去智能地创建最终要执行的测试用例。
+//    Core idea of this factory: collect all filter conditions defined in testng.xml,
+//    package them, and delegate to a dedicated data provider (StaticDataProvider)
+//    to intelligently create the final set of test cases to execute.
     @Factory
     @Parameters({"component", "sanityOnly", "scenario", "ids", "runId", "labels"}) // from xmlTest.parameter
     public Object[] createInstances(String component, String sanityOnly, String scenario, String ids, String runId, @Optional("") String labels) {

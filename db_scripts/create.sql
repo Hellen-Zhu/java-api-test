@@ -36,7 +36,7 @@ CREATE TABLE auto_progress (
                                task_status CHARACTER VARYING(25),
                                run_by CHARACTER VARYING(50),
                                label CHARACTER VARYING(1000),
-                               runmode CHARACTER VARYING(255),  -- 将枚举类型改为通用的VARYING，以兼容性更好
+                                runmode CHARACTER VARYING(255),  -- Change enum to generic VARYING for better compatibility
                                profile CHARACTER VARYING(200),
                                update_time TIMESTAMP(6) WITHOUT TIME ZONE
 );
@@ -48,7 +48,7 @@ CREATE TRIGGER trigger_update_at
     BEFORE UPDATE ON auto_case
     FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
 
--- 创建索引
+-- Create index
 CREATE INDEX idx_component_auto_progress ON auto_progress (component);
 CREATE INDEX idx_run_id_auto_progress ON auto_progress (runid);
 

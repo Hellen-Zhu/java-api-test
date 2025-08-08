@@ -51,7 +51,7 @@ public class BaseTest implements ITest {
 
     @AfterMethod
     public void afterMethod() {
-        // 清理数据库上下文
+        // Clear database context
         try {
             DBUtil.clearJpaDb();
             log.debug("Database context cleared after test method");
@@ -59,7 +59,7 @@ public class BaseTest implements ITest {
             log.warn("Failed to clear database context: " + e.getMessage());
         }
         
-        // 清理ThreadLocal
+        // Clear ThreadLocal
         if (testName != null) {
             testName.remove();
         }
@@ -69,7 +69,7 @@ public class BaseTest implements ITest {
     public void afterClass() {
         log.info("Test class cleanup started");
         try {
-            // 确保所有数据库连接都被清理
+            // Ensure all database connections are cleared
             DBUtil.clearJpaDb();
             log.info("Final database cleanup completed");
         } catch (Exception e) {
@@ -82,7 +82,7 @@ public class BaseTest implements ITest {
         String name = "";
         if(testName != null) {
             name = testName.get();
-            // 不在这里清理ThreadLocal，留给afterMethod处理
+            // Do not clear ThreadLocal here; leave it to afterMethod
         }
         return name;
     }

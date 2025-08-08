@@ -30,13 +30,13 @@ public class Test_userLogin {
     public void trigger_login_API(ITestContext testContext) {
         response = APIUtil.requestAPI(testParameter, testContext);
         
-        // 使用ResponseValidator进行动态验证
+        // Validate dynamically with ResponseValidator
         ResponseValidator.validateResponse(testParameter, response);
         
         responseJSON = JSONObject.parseObject(response.asString());
         log.info("responseJSON = {}", responseJSON);
 
-        // 从响应中获取token并存储到缓存中
+        // Extract token from response and store it in cache
         if (responseJSON != null && responseJSON.containsKey("data")) {
             JSONObject data = responseJSON.getJSONObject("data");
             if (data != null && data.containsKey("token")) {

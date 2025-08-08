@@ -12,8 +12,8 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI springOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("mondo-testng-api-service API")
-                        .description("Author: Tammy, Steven, Terrence")
+                .info(new Info().title("auto-api-service API")
+                        .description("Author: Hellen")
                         .version("1.0")
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }

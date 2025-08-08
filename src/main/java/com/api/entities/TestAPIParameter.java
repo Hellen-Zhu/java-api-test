@@ -54,7 +54,7 @@ public class TestAPIParameter implements Cloneable {
 
     //Others
     JSONObject checkPointJSONObject;
-    Response response; // 假设 Response 是一个自定义类或来自像RestAssured这样的库
+    Response response; // Assume Response is a library type (e.g., RestAssured)
     String currentMethodName;
 
     @Override

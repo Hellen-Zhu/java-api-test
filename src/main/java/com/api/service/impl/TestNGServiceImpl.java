@@ -38,7 +38,7 @@ public class TestNGServiceImpl implements TestNGService {
         }
     }
 
-    // 直接实现 triggerByCode 逻辑
+    // Implement triggerByCode logic directly
     private void triggerByCode(JSONObject requestObject) {
         setSystemProperties();
         TestNG testNG = new TestNG();

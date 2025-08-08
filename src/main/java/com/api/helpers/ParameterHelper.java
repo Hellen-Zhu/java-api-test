@@ -169,7 +169,7 @@ public class ParameterHelper {
                 parameter.setClassName(TEST_DEFAULT_CLASSNAME);
                 parameter.setBaseURL(StringUtils.EMPTY);
 
-                // 非默认服务名需要从 autoEndpoint 中找 className
+                // For non-default service names, fetch className from autoEndpoint
                 if (!StringUtils.equalsIgnoreCase(serviceName, TEST_DEFAULT_SERVICE_NAME)) {
                     parameter.setClassName(
                             autoEndpoints.stream()

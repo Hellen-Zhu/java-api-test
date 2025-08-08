@@ -4,7 +4,7 @@ spring:
   profiles:
     active: uat
 
-# 为 SessionFactory 添加期望的数据库配置格式
+# Expected database configuration format for SessionFactory
 ehapi:
   db:
     lif:
@@ -35,7 +35,7 @@ logging:
     org.apache.ibatis: DEBUG
 
 
-# 测试配置
+# Test configuration
 test:
   timeout: 30000
   retry-count: 3
@@ -55,3 +55,5 @@ springdoc:
   swagger-ui:
     path: /swagger-ui/index.html
     enabled: true
+    url: /openapi.yaml
+    disable-swagger-default-url: true
