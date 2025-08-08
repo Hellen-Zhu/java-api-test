@@ -185,8 +185,7 @@ public class EHAPIController {
         if (requestBody.containsKey("versionId")) {
             requestObject.put(XmlSuiteDetailAttribute.VERSION_ID.getName(), requestBody.getString("versionId"));
         }
-        // 注意：这里不需要再次设置label，因为在buildFinalRequestBodySet中已经设置了
-        // 如果requestObject中已经有label，就保持；如果没有，则从requestBody中获取
+
         if (!requestObject.containsKey(XmlSuiteDetailAttribute.LABEL_LIST.getName()) && requestBody.containsKey("label")) {
             requestObject.put(XmlSuiteDetailAttribute.LABEL_LIST.getName(), requestBody.getString("label"));
         }

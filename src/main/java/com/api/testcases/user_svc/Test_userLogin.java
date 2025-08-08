@@ -3,6 +3,7 @@ package com.api.testcases.user_svc;
 import com.alibaba.fastjson2.JSONObject;
 import com.api.entities.TestAPIParameter;
 import com.api.utils.APIUtil;
+import com.api.utils.MemoryCacheUtil;
 import com.api.utils.ResponseValidator;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -15,6 +16,8 @@ public class Test_userLogin {
     private Response response;
     private JSONObject responseJSON;
     public TestAPIParameter testParameter;
+    MemoryCacheUtil memoryCacheUtil = MemoryCacheUtil.getInstance();
+
     private Test_userLogin(TestAPIParameter testParameter) {
         this.testParameter = testParameter;
     }
@@ -32,6 +35,20 @@ public class Test_userLogin {
         
         responseJSON = JSONObject.parseObject(response.asString());
         log.info("responseJSON = {}", responseJSON);
+
+        // 从响应中获取token并存储到缓存中
+        if (responseJSON != null && responseJSON.containsKey("data")) {
+            JSONObject data = responseJSON.getJSONObject("data");
+            if (data != null && data.containsKey("token")) {
+                String token = data.getString("token");
+                memoryCacheUtil.put("token", token);
+                log.info("Token stored in cache: {}", token);
+            } else {
+                log.warn("Token not found in response data");
+            }
+        } else {
+            log.warn("Response data is null or does not contain 'data' field");
+        }
     }
 
     @Test(dependsOnMethods = "trigger_login_API")

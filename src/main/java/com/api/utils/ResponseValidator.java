@@ -1,11 +1,13 @@
 package com.api.utils;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.api.entities.TestAPIParameter;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.hamcrest.Matchers.*;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -175,13 +177,27 @@ public class ResponseValidator {
                 if (expectedValue instanceof JSONObject || expectedValue instanceof Map) {
                     // Recursively validate nested objects
                     validateJsonRecursively(newPath, actualValue, expectedValue);
-                } else {
-                    // Compare leaf values
-                    if (!String.valueOf(expectedValue).equals(String.valueOf(actualValue))) {
-                        throw new AssertionError(String.format("Value mismatch at %s: expected=%s, actual=%s", 
-                            newPath, expectedValue, actualValue));
+                } else if (actualValue instanceof JSONArray) {
+                    // Array handling
+                    if (expectedValue instanceof JSONArray || expectedValue instanceof List) {
+                        JSONArray expectedArray = expectedValue instanceof JSONArray
+                                ? (JSONArray) expectedValue
+                                : new JSONArray((List<?>) expectedValue);
+                        JSONArray actualArray = (JSONArray) actualValue;
+                        for (int i = 0; i < expectedArray.size(); i++) {
+                            Object expectedElement = expectedArray.get(i);
+                            boolean matched = tryMatchAnyElement(newPath + "[?]", actualArray, expectedElement);
+                            if (!matched) {
+                                throw new AssertionError("No array element matches expected structure at " + newPath + " index " + i);
+                            }
+                        }
+                    } else {
+                        // Actual is an array while expected is a scalar -> check array contains the scalar
+                        validateArrayMatchesAnyElement(newPath, (JSONArray) actualValue, expectedValue);
                     }
-                    log.info("JSON structure validation passed: {} = {}", newPath, expectedValue);
+                } else {
+                    // Compare leaf values with simple operators support
+                    assertLeafMatches(newPath, actualValue, expectedValue);
                 }
             }
         } else if (expectedJson instanceof Map && actualJson instanceof JSONObject) {
@@ -203,23 +219,128 @@ public class ResponseValidator {
                 if (expectedValue instanceof Map || expectedValue instanceof JSONObject) {
                     // Recursively validate nested objects
                     validateJsonRecursively(newPath, actualValue, expectedValue);
-                } else {
-                    // Compare leaf values
-                    if (!String.valueOf(expectedValue).equals(String.valueOf(actualValue))) {
-                        throw new AssertionError(String.format("Value mismatch at %s: expected=%s, actual=%s", 
-                            newPath, expectedValue, actualValue));
+                } else if (actualValue instanceof JSONArray) {
+                    // Array handling
+                    if (expectedValue instanceof JSONArray || expectedValue instanceof List) {
+                        JSONArray expectedArray = expectedValue instanceof JSONArray
+                                ? (JSONArray) expectedValue
+                                : new JSONArray((List<?>) expectedValue);
+                        JSONArray actualArray = (JSONArray) actualValue;
+                        for (int i = 0; i < expectedArray.size(); i++) {
+                            Object expectedElement = expectedArray.get(i);
+                            boolean matched = tryMatchAnyElement(newPath + "[?]", actualArray, expectedElement);
+                            if (!matched) {
+                                throw new AssertionError("No array element matches expected structure at " + newPath + " index " + i);
+                            }
+                        }
+                    } else {
+                        // Actual is an array while expected is a scalar -> check array contains the scalar
+                        validateArrayMatchesAnyElement(newPath, (JSONArray) actualValue, expectedValue);
                     }
-                    log.info("JSON structure validation passed: {} = {}", newPath, expectedValue);
+                } else {
+                    // Compare leaf values with simple operators support
+                    assertLeafMatches(newPath, actualValue, expectedValue);
+                }
+            }
+        } else if (actualJson instanceof JSONArray && (expectedJson instanceof JSONObject || expectedJson instanceof Map)) {
+            // Actual is array, expected is a single object -> ensure any element matches
+            validateArrayMatchesAnyElement(currentPath, (JSONArray) actualJson, expectedJson);
+        } else if (actualJson instanceof JSONArray && (expectedJson instanceof List || expectedJson instanceof JSONArray)) {
+            // Actual is array, expected is array -> each expected element must be matched by at least one actual element
+            JSONArray actualArray = (JSONArray) actualJson;
+            JSONArray expectedArray = expectedJson instanceof JSONArray ? (JSONArray) expectedJson : new JSONArray((List<?>) expectedJson);
+            for (int i = 0; i < expectedArray.size(); i++) {
+                Object expectedElement = expectedArray.get(i);
+                boolean matched = tryMatchAnyElement(currentPath + "[?]", actualArray, expectedElement);
+                if (!matched) {
+                    throw new AssertionError("No array element matches expected structure at " + currentPath + " index " + i);
                 }
             }
         } else {
-            // Direct value comparison
-            if (!String.valueOf(expectedJson).equals(String.valueOf(actualJson))) {
-                throw new AssertionError(String.format("Value mismatch at %s: expected=%s, actual=%s", 
-                    currentPath, expectedJson, actualJson));
-            }
-            log.info("JSON structure validation passed: {} = {}", currentPath, expectedJson);
+            // Direct value comparison with operators
+            assertLeafMatches(currentPath, actualJson, expectedJson);
         }
+    }
+
+    private static void assertLeafMatches(String path, Object actualValue, Object expectedValue) {
+        // null handling
+        if (expectedValue == null) {
+            if (actualValue != null) {
+                throw new AssertionError(String.format("Value mismatch at %s: expected=null, actual=%s", path, actualValue));
+            }
+            log.info("JSON structure validation passed: {} = null", path);
+            return;
+        }
+
+        if (expectedValue instanceof String) {
+            String expectedString = (String) expectedValue;
+            // wildcard -> not null
+            if ("*".equals(expectedString) || "${any}".equalsIgnoreCase(expectedString) || "${notNull}".equalsIgnoreCase(expectedString)) {
+                if (actualValue == null || String.valueOf(actualValue).isEmpty()) {
+                    throw new AssertionError("Expected non-null at " + path);
+                }
+                log.info("JSON structure validation passed: {} is not null", path);
+                return;
+            }
+            // regex:... matching
+            if (expectedString.startsWith("regex:")) {
+                String pattern = expectedString.substring("regex:".length());
+                if (actualValue == null || !String.valueOf(actualValue).matches(pattern)) {
+                    throw new AssertionError(String.format("Regex mismatch at %s: expected pattern=%s, actual=%s", path, pattern, actualValue));
+                }
+                log.info("JSON structure validation passed: {} matches regex", path);
+                return;
+            }
+            // contains:... substring matching
+            if (expectedString.startsWith("contains:")) {
+                String needle = expectedString.substring("contains:".length());
+                if (actualValue == null || !String.valueOf(actualValue).contains(needle)) {
+                    throw new AssertionError(String.format("Contains mismatch at %s: expected substring=%s, actual=%s", path, needle, actualValue));
+                }
+                log.info("JSON structure validation passed: {} contains substring", path);
+                return;
+            }
+        }
+
+        if (!String.valueOf(expectedValue).equals(String.valueOf(actualValue))) {
+            throw new AssertionError(String.format("Value mismatch at %s: expected=%s, actual=%s",
+                    path, expectedValue, actualValue));
+        }
+        log.info("JSON structure validation passed: {} = {}", path, expectedValue);
+    }
+
+    /**
+     * Validate that an array contains at least one element that matches expected
+     */
+    private static void validateArrayMatchesAnyElement(String currentPath, JSONArray actualArray, Object expectedElement) {
+        // If the expected element is a Map/JSONObject, we try to match structure; otherwise compare direct equality
+        boolean matched = tryMatchAnyElement(currentPath + "[?]", actualArray, expectedElement);
+        if (!matched) {
+            throw new AssertionError("No array element matches expected structure at " + currentPath);
+        }
+        log.info("Array validation passed at {}: found matching element", currentPath);
+    }
+
+    private static boolean tryMatchAnyElement(String basePath, JSONArray actualArray, Object expectedElement) {
+        for (int i = 0; i < actualArray.size(); i++) {
+            Object actualElement = actualArray.get(i);
+            try {
+                String elementPath = basePath.replace("?", String.valueOf(i));
+                if (expectedElement instanceof Map || expectedElement instanceof JSONObject) {
+                    // Deep structure check
+                    validateJsonRecursively(elementPath, actualElement, expectedElement);
+                } else {
+                    // Direct value comparison
+                    if (!String.valueOf(expectedElement).equals(String.valueOf(actualElement))) {
+                        throw new AssertionError("Value mismatch");
+                    }
+                }
+                return true; // If no exception thrown, match succeeded
+            } catch (AssertionError ignore) {
+                // try next element
+            }
+        }
+        return false;
     }
 
     /**
