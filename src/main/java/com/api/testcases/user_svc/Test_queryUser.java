@@ -1,10 +1,10 @@
 package com.api.testcases.user_svc;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.api.entities.TestAPIParameter;
-import com.api.utils.APIUtil;
-import com.api.utils.MemoryCacheUtil;
-import com.api.utils.ResponseValidator;
+import com.api.data.entities.TestAPIParameter;
+import com.api.common.utils.APIUtil;
+import com.api.common.utils.MemoryCacheUtil;
+import com.api.common.utils.ResponseValidator;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;

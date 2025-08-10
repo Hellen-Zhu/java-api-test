@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
 @SpringBootApplication
-@MapperScan("com.api.mapper")
+@MapperScan("com.api.data.mapper")
 public class ApiAutoTestApplication {
 
     public static void main(String[] args) {

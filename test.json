@@ -1,53 +1,24 @@
 {
   "1": {
-    "path": "/dar/user/login",
-    "method": "post",
+    "path": "/api/order/customer/orderPlan/getMaterial",
+    "method": "get",
     "comment": "",
-    "request": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "body": {
-        "username": "admin",
-        "password": "admin123"
-      }
-    },
+    "request": {},
     "caseHelp": {},
-    "description": "Should able to query user",
-    "serviceName": "user_svc"
-  },
-  "2": {
-    "path": "/dar/user/queryUser",
-    "method": "post",
-    "comment": "",
-    "request": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "body": {
-        "username": "admin"
-      }
-    },
-    "caseHelp": {},
-    "description": "Should able to query user",
-    "serviceName": "user_svc",
+    "description": "Should able to query order",
+    "serviceName": "order_svc",
     "checkpoints": {
       "expectedStatusCode": 200,
       "jsonPath": {
-        "message": "Query successful"
+        "message": "Materials retrieved successfully"
       },
       "partialJson": {
         "data": [
-          {
-            "created_at": "2025-08-06T16:00:47.627830",
-            "dates": "2023-12-31",
-            "id": "84451413593",
-            "password": "admin123",
-            "phone": "13800000000",
-            "role_id": "123456789",
-            "updated_at": "2025-08-06T16:00:47.627831",
-            "username": "admin"
-          }
+          "1676511586856882178",
+          "1676511586856882134",
+          "1676511524756882178",
+          "1676590766856882178",
+          "1676511586812182178"
         ]
       }
     }

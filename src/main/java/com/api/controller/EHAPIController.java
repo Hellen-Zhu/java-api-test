@@ -1,8 +1,8 @@
 package com.api.controller;
 
-import com.api.entities.testng.XmlSuiteDetailAttribute;
+import com.api.common.enums.XmlSuiteDetailAttribute;
 import com.api.service.TestNGService;
-import com.api.mapper.LIFMapper;
+import com.api.data.mapper.LIFMapper;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.swagger.v3.oas.annotations.Operation;

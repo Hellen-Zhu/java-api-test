@@ -29,14 +29,6 @@ public class TestNGServiceImpl implements TestNGService {
         }
     }
 
-    @Override
-    public void runWithoutAsync(JSONObject requestObject) {
-        try {
-            triggerByCode(requestObject);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
     // Implement triggerByCode logic directly
     private void triggerByCode(JSONObject requestObject) {

@@ -1,7 +1,7 @@
 package com.api.testcases;
 
-import com.api.entities.testng.IOrderedMethod;
-import com.api.entities.TestAPIParameter;
+import com.api.data.entities.testng.IOrderedMethod;
+import com.api.data.entities.TestAPIParameter;
 import lombok.SneakyThrows;
 import org.testng.IMethodInstance;
 import org.testng.IMethodInterceptor;
