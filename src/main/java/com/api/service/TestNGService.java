@@ -5,6 +5,4 @@ public interface TestNGService {
 
     void runWithAsync(JSONObject requestObject);
 
-    void runWithoutAsync(JSONObject requestObject);
-
 }

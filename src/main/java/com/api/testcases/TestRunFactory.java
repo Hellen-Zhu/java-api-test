@@ -1,7 +1,7 @@
 package com.api.testcases;
 
-import com.api.entities.testng.XmlSuiteDetailAttribute;
-import com.api.helpers.StaticDataProvider;
+import com.api.common.enums.XmlSuiteDetailAttribute;
+import com.api.common.helpers.StaticDataProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Factory;

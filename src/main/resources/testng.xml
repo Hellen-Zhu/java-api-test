@@ -1,17 +1,17 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="suite" verbose="1">
 <listeners>
-    <listener class-name="com.api.listeners.AlterListener"/>
-    <listener class-name="com.api.listeners.XmlTestListener"/>
-    <listener class-name="com.api.listeners.XmlSuiteListener"/>
+    <listener class-name="com.api.common.listeners.AlterListener"/>
+    <listener class-name="com.api.common.listeners.XmlTestListener"/>
+    <listener class-name="com.api.common.listeners.XmlSuiteListener"/>
 </listeners>
 
 <parameter name="isDebug" value="false"/>
 <parameter name="module" value=""/>
 <parameter name="component" value="auto_test"/>
-<parameter name="scenario" value="user_login"/>
+<parameter name="scenario" value=""/>
 <parameter name="scenarios" value=""/>
-<parameter name="ids" value="3"/>
+<parameter name="ids" value=""/>
 <parameter name="runId" value=""/>
 <parameter name="releaseVersionList" value="1.0.0"/>
 <parameter name="sanityOnly" value="false"/>

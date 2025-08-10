@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.api.mapper.PostgreMapper">
-    <select id="fetchXmlSuiteDetailParameters" resultType="com.api.entities.testng.ReportAttributeInfo">
+<mapper namespace="com.api.data.mapper.PostgreMapper">
+    <select id="fetchXmlSuiteDetailParameters" resultType="com.api.data.entities.testng.ReportAttributeInfo">
         select cs.component,cs.scenarios,cf.suite,cf.dailyRunVersion
         from (
         select distinct component, string_agg(scenario,',') as scenarios from
@@ -89,7 +89,7 @@
     <select id="selectStringListBySQL" parameterType="String" resultType="java.lang.String">
         ${sql}
     </select>
-    <select id="auto_case" resultType="com.api.entities.TestAPIParameter">
+    <select id="auto_case" resultType="com.api.data.entities.TestAPIParameter">
         select distinct id,profile_name as profileName,parameter::jsonb,component as suite,
         component as component,is_sanity as isSanity,component_like as componentLike,
         description as testCaseDescription,issue_key as issueKey,method,path,is_e2e as isE2E,scenario,label
@@ -122,7 +122,7 @@
         </where>
     </select>
 
-    <select id="auto_baseurl" resultType="com.api.entities.TestAPIParameter" flushCache="false">
+    <select id="auto_baseurl" resultType="com.api.data.entities.TestAPIParameter" flushCache="false">
         select service_name as serviceName, profile_name as profileName, base_url as baseURL from auto_baseurl
         <where>
             <if test="condition!=null">
@@ -131,7 +131,7 @@
         </where>
     </select>
 
-    <select id="auto_system_variable" resultType="com.api.entities.lif.AutoSystemVariable" flushCache="false">
+    <select id="auto_system_variable" resultType="com.api.data.entities.lif.AutoSystemVariable" flushCache="false">
         select distinct component,component_like as componentLike,config_key as configKey, value from auto_system_variable
         <where>
             <if test="component!=null and component.length >0">
@@ -152,7 +152,7 @@
         </where>
     </select>
 
-    <select id="auto_endpoint" resultType="com.api.entities.TestAPIParameter" flushCache="false">
+    <select id="auto_endpoint" resultType="com.api.data.entities.TestAPIParameter" flushCache="false">
         select component,path,method,class_name as className,service_name as serviceName from auto_endpoint
     </select>
 
@@ -173,7 +173,7 @@
         update auto_testngresult set suite_result=#{suiteResult}, insertDateTime=#{insertDateTime} where runid='${runId}' and component='${component}'
     </update>
 
-    <select id="queryComponentGroupByModule" resultType="com.api.entities.auto.ComponentProgress">
+    <select id="queryComponentGroupByModule" resultType="com.api.data.entities.auto.ComponentProgress">
         select re.group_id as groupId, re.run_id as runId, re.component, a.task_status::text as taskStatus from report_progress re
                                                                                                                     join auto_progress a on re.run_id = a.runid
         where re.group_id = (select group_id from report_progress where run_id = '${runId}')

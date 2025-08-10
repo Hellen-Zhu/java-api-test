@@ -48,14 +48,11 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     // === Test dependencies ===
-    // Include Spring Boot test starter and exclude default JUnit 5
-    implementation('org.springframework.boot:spring-boot-starter-test') {
+    // Include Spring Boot test starter (test scope) and exclude default JUnit 5
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'org.junit.jupiter', module: 'junit-jupiter'
     }
-
-    // Explicitly include TestNG as the test framework
-    implementation 'org.testng:testng:7.10.2'
 
     // Include Rest-Assured for API testing
     implementation 'io.rest-assured:rest-assured:5.4.0'
@@ -67,6 +64,6 @@ dependencies {
 
 tasks.named('test') {
     useTestNG() {
-        suites "src/resources/testng.xml"
+        suites "src/main/resources/testng.xml"
     }
 }
