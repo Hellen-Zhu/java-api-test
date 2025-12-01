@@ -47,6 +47,10 @@ dependencies {
     // === Runtime dependencies ===
     runtimeOnly 'org.postgresql:postgresql'
 
+    // === WebSocket dependencies ===
+    implementation 'org.java-websocket:Java-WebSocket:1.5.4'
+    implementation 'com.networknt:json-schema-validator:1.0.87'
+
     // === Test dependencies ===
     // Include Spring Boot test starter (test scope) and exclude default JUnit 5
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
